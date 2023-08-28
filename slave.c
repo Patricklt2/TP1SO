@@ -38,8 +38,6 @@ int calculate_md5sum(char *filename, char* str)
 
     int pid = getpid();
 
-
-
     strcat(str,"MD5: ");
 
     //Puntero auxiliar para copiar hash al puntero string y poder concatenar el HASH
@@ -66,6 +64,8 @@ int calculate_md5sum(char *filename, char* str)
     return 0;
 }
 
+//Falta hacer que main tome el argv[1] via pipe y que en vez de printf, mande el string con all via pipe al padre
+//COMPILAR SLAVE CON -lssl -lcrypto -Wall -pedantic
 int main(int argc, char *argv[])
 {
     char *str = malloc(sizeof(char)*100);
