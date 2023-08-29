@@ -2,13 +2,25 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <dirent.h>
 #define SLAVENUM 5
 #define MAXFILESPERSLAVE 2
 
+typedef struct pipechannles{
+    int pid;
+    int pipe_de_slave[2];
+    int pipe_a_slave[2];
+}pipechannels;
+
 int main(int argc, char *argv[]) {
-
-    int currentFile = 0;
-
+    pipechannels pipes[SLAVENUM];
+    for(int i=0;i<SLAVENUM){
+        open(pipes[i].pipe_de_slave);//todo de ver como manipular los pipes
+        open(pipe[i].pipe_a_slave);
+        if((pipes[i].pid=fork())==0){
+            break; //unica form
+        }
+    }
     //creates a buffer and prints the information necessary in stdout for the vista process to connect
 
     //waits 2 seconds for a vista process
