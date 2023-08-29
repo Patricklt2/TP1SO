@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <dirent.h>
 #define SLAVENUM 5
-#define MAXFILESPERSLAVE 20
+#define FILES_PER_SLAVENUM 20
+#define MAXFILESPERSLAVE 2
 
 typedef struct pipechannles{
     int pid;
@@ -15,12 +16,12 @@ typedef struct pipechannles{
 int calculateSlavesNum(int fAmount);
 
 int main(int argc, char *argv[]) {
-    pipechannels pipes[SLAVENUM];
     int currentFile=0;
 
-    int slavesAmount = calculateSlavesNum(argc - 1);
+    int slavesNum = calculateSlavesNum(argc - 1);
+    pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
 
-    for(int i=0;i<slavesAmount;i++){
+    for(int i=0;i<slavesNum;i++){
         open(pipes[i].master_a_slave);//todo de ver como manipular los pipes
         open(pipes[i].slave_a_master);
         if((pipes[i].pid=fork())==0){
@@ -53,9 +54,10 @@ int main(int argc, char *argv[]) {
     }
 
     //once all the slaves finish, writes to the result file and returns
+    free(pipes);
 }
 
 
 int calculateSlavesNum(int fAmount) {
-    return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / MAXFILESPERSLAVE) + 1) * SLAVENUM);
+    return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);
 }
