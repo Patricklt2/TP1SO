@@ -68,6 +68,7 @@ int calculate_md5sum(char *filename, char* str)
 
 int main(int argc, char *argv[])
 {
+    printf("hola");
     char *str = malloc(sizeof(char)*100);
     calculate_md5sum(argv[1], str);
 

@@ -5,11 +5,15 @@
 
 #define SLAVENUM 5
 #define MAXFILESPERSLAVE 20
+#define SLAVE_PATH "b"
+
+pid_t* createSlaveProcesses(int fAmount);
 
 int main(int argc, char *files[]) {
 
     int fAmount = argc - 1;
     int currentFile = 0;
+    printf("%d\n", argc);
 
     //creates a buffer and prints the information necessary in stdout for the vista process to connect
 
@@ -34,12 +38,23 @@ int main(int argc, char *files[]) {
 
 pid_t* createSlaveProcesses(int fAmount) {
     //creates as many slaves as files if the number is too low, creates x slaves per y files (eg. 5 slaves every 20 files)
-    int slaves = (fAmount < SLAVENUM) ? (fAmount) : ((fAmount / MAXFILESPERSLAVE) * SLAVENUM);
+    int slaves = (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / MAXFILESPERSLAVE) + 1) * SLAVENUM);
+
 
     pid_t* slaveArr = malloc(slaves * sizeof(pid_t));
-
     for(int i=0; i<slaves; i++) {
         //creates slaves and stores them in the array
+        pid_t child_pid = fork();
+        if (child_pid == 0) {
+            printf("creating slave process\n");
+            //creates the slave process here
+            exit(1);
+        } else if (child_pid > 0) {
+            slaveArr[i] = child_pid;
+        } else {
+            perror("error in fork creation");
+            exit(1);
+        }
     }
 
     return slaveArr;
