@@ -38,7 +38,13 @@ int main(int argc, char *argv[]) {
             dup2(pipes[i].master_a_slave[1],STDOUT_FILENO);
         }
     }
+
+
     //creates a buffer and prints the information necessary in stdout for the vista process to connect
+
+    char sharedMemAddress[50];//TODO aca es donde va la info necesaria para el vista; el 50 es arbitrario
+
+    fputs(sharedMemAddress, stdout);
 
     //waits 2 seconds for a vista process
 
