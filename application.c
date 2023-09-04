@@ -3,6 +3,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "memoryADT.h"
+
 #define SLAVENUM 5
 #define FILES_PER_SLAVENUM 20
 #define MAXFILESPERSLAVE 2
@@ -21,6 +26,7 @@ int main(int argc, char *argv[]) {
     int slavesNum = calculateSlavesNum(argc - 1);
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
 
+    /*
     for(int i=0;i<slavesNum;i++){
         open(pipes[i].master_a_slave);//todo de ver como manipular los pipes
         open(pipes[i].slave_a_master);
@@ -38,26 +44,21 @@ int main(int argc, char *argv[]) {
             dup2(pipes[i].master_a_slave[1],STDOUT_FILENO);
         }
     }
+*/
+    memoryADT mem = createSharedMem();
+    //prints on stdout the information necessary for the vista process to connect
+    sleep(2);
+    fputs(getMemoryID(mem), stdout);
 
+    char* memMap = getMemoryMap(mem);
+    strcpy(memMap, "written from app.c!\n");
 
-    //creates a buffer and prints the information necessary in stdout for the vista process to connect
-
-    char sharedMemAddress[50];//TODO aca es donde va la info necesaria para el vista; el 50 es arbitrario
-
-    fputs(sharedMemAddress, stdout);
-
-    //waits 2 seconds for a vista process
 
     //decides how many slave processes need to be created and initializes them
 
     //waits until a slave process finishes, and writes the result on the buffer
 
     //assigns a new file to the slave process, if there's none left, the slave is killed
-    if(currentFile > MAXFILESPERSLAVE) {
-        //kills
-    } else {
-        //gives the slave a new file
-    }
 
     //once all the slaves finish, writes to the result file and returns
     free(pipes);
