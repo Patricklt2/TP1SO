@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <sys/types.h>
 
 typedef struct memoryCDT{
     char* fileID;

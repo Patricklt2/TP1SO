@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
+CFLAGS = -Wall -Wextra -std=c99 -D_XOPEN_SOURCE=500
 LDFLAGS =
 
 # Source files for the application target

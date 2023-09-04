@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
 #include "memoryADT.h"
 
 #define SLAVENUM 5
