@@ -75,3 +75,10 @@ char* _mapMem(int fd) {
     }
     return aux;
 }
+
+
+//FREE
+
+void freeMem(memoryADT m) {
+    free(m);
+}

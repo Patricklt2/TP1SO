@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
 
     //once all the slaves finish, writes to the result file and returns
     free(pipes);
+    freeMem(mem);
 }
 
 

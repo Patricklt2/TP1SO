@@ -15,5 +15,6 @@ int main(int argc, char* argv[]) {
     char* memMap = getMemoryMap(sharedMem);
 
     printf("%s", memMap);
+    freeMem(sharedMem);
     return 0;
 }
