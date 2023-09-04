@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
     fputs(getMemoryID(mem), stdout);
 
     char* memMap = getMemoryMap(mem);
+    strcpy(memMap, "written from app.c!\n");
 
 
     //decides how many slave processes need to be created and initializes them
@@ -66,10 +67,4 @@ int main(int argc, char *argv[]) {
 
 int calculateSlavesNum(int fAmount) {
     return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);
-}
-
-void* shmCreate(size_t size) {
-    int protection = PROT_READ | PROT_WRITE;
-    int visibility = MAP_SHARED | MAP_ANONYMOUS;
-    return mmap(NULL, size, protection, visibility, -1, 0);
 }

@@ -14,5 +14,6 @@ int main(int argc, char* argv[]) {
     memoryADT sharedMem = openExistingMemory(appOutput);
     char* memMap = getMemoryMap(sharedMem);
 
+    printf("%s", memMap);
     return 0;
 }
