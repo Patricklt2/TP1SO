@@ -23,10 +23,8 @@ int calculateSlavesNum(int fAmount);
 
 int main(int argc, char *argv[]) {
     int currentFile=0;
-
     int slavesNum = calculateSlavesNum(argc - 1);
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
-
     /*
     for(int i=0;i<slavesNum;i++){
         open(pipes[i].master_a_slave);//todo de ver como manipular los pipes
@@ -46,6 +44,7 @@ int main(int argc, char *argv[]) {
         }
     }
 */
+
     memoryADT mem = createSharedMem();
     //prints on stdout the information necessary for the vista process to connect
     sleep(2);
@@ -63,7 +62,6 @@ int main(int argc, char *argv[]) {
 
     //once all the slaves finish, writes to the result file and returns
     free(pipes);
-    freeMem(mem);
 }
 
 
