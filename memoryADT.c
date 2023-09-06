@@ -24,11 +24,16 @@ memoryADT _mapMem(int fd);
 memoryADT createSharedMem() {
     //TODO generar nombre aleatorio
     memoryADT m;
-    char* id = "/placeholder";
+    char* id = "/placeholder2";
     int fd = _openMem(id, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
     _trunMem(fd);
     m = _mapMem(fd);
     strcpy(m->fileID, id);
+
+    if(sem_init(&m->sem, 1, 0) == -1){
+        perror("sem_init");
+        exit(EXIT_FAILURE);
+    }
     return m;
 }
 
@@ -37,6 +42,10 @@ memoryADT openExistingMemory(char* id) {
     int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR);
     m = _mapMem(fd);
     return m;
+}
+
+sem_t* getMemorySem(memoryADT memory) {
+    return &memory->sem;
 }
 
 char* getMemoryMap(memoryADT memory) {
@@ -65,7 +74,7 @@ void _trunMem(int fd) {
     }
 }
 memoryADT _mapMem(int fd) {
-    char* aux = mmap(NULL, sizeof(memoryCDT), PROT_WRITE, MAP_SHARED, fd, 0);
+    memoryADT aux = mmap(NULL, sizeof(memoryCDT), PROT_WRITE, MAP_SHARED, fd, 0);
     if(aux == MAP_FAILED) {
         perror("mmap");
         exit(EXIT_FAILURE);

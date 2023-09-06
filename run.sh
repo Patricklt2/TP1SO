@@ -8,7 +8,7 @@ fi
 
 case "$1" in
   "all")
-    ./application.out | ./vista.out
+    ./application.out | ./vista.out &
     ;;
   "app")
     ./application.out

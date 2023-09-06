@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <semaphore.h>
 #include "memoryADT.h"
 
 #define SLAVENUM 5
@@ -23,7 +24,11 @@ int calculateSlavesNum(int fAmount);
 
 int main(int argc, char *argv[]) {
     int currentFile=0;
+    sem_t* vistaSem;
+    int semVal;
     int slavesNum = calculateSlavesNum(argc - 1);
+    int vistaRunning = 0;
+
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
     /*
     for(int i=0;i<slavesNum;i++){
@@ -44,15 +49,27 @@ int main(int argc, char *argv[]) {
         }
     }
 */
-
     memoryADT mem = createSharedMem();
     //prints on stdout the information necessary for the vista process to connect
-    sleep(2);
     fputs(getMemoryID(mem), stdout);
 
+    sleep(2);
     char* memMap = getMemoryMap(mem);
-    strcpy(memMap, "written from app.c!\n");
+    vistaSem = getMemorySem(mem);
+    char* mapPtr = memMap;
 
+
+    //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
+    char* str1 = "Hello Barbie\n";
+    char* str2 = "Hello Ken\n";
+
+    strcpy(mapPtr, str1);
+    sem_post(vistaSem);
+
+    mapPtr += strlen(str1) + 1;
+
+    strcpy(mapPtr, str2);
+    sem_post(vistaSem);
 
     //decides how many slave processes need to be created and initializes them
 
