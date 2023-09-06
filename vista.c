@@ -13,7 +13,6 @@ int getMemoryAddress(char* pName, char* buffer);
 int main(int argc, char* argv[]) {
     char appOutput[50];
     char buffer[128];
-    int semVal;
 
     if(argc > 1) {
         if(getMemoryAddress(argv[1], appOutput) == -1) {

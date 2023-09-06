@@ -25,9 +25,7 @@ int calculateSlavesNum(int fAmount);
 int main(int argc, char *argv[]) {
     int currentFile=0;
     sem_t* vistaSem;
-    int semVal;
     int slavesNum = calculateSlavesNum(argc - 1);
-    int vistaRunning = 0;
 
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
     /*
