@@ -6,38 +6,36 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <semaphore.h>
+#include <string.h>
 
 typedef struct memoryCDT{
-    char* fileID;
-    int fd;
-    char* map;
+    char fileID[64];
+    sem_t sem;
+    char map[MEMORY_SIZE];
 } memoryCDT;
 
-typedef memoryCDT* memoryADT;
 
 int _openMem(char* id, int oflag, mode_t mode);
 void _trunMem(int fd);
-char* _mapMem(int fd);
+memoryADT _mapMem(int fd);
 
 memoryADT createSharedMem() {
     //TODO generar nombre aleatorio
-    memoryADT m = malloc(sizeof(memoryCDT));
-
-    m->fileID = "/placeholder";
-    m->fd = _openMem(m->fileID, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    _trunMem(m->fd);
-    m->map = _mapMem(m->fd);
-
+    memoryADT m;
+    char* id = "/placeholder";
+    int fd = _openMem(id, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    _trunMem(fd);
+    m = _mapMem(fd);
+    strcpy(m->fileID, id);
     return m;
 }
 
 memoryADT openExistingMemory(char* id) {
-    memoryADT m = malloc(sizeof(memoryCDT));
-
-    m->fileID = id;
-    m->fd = _openMem(m->fileID, O_RDWR, S_IRUSR | S_IWUSR);
-    m->map = _mapMem(m->fd);
-
+    memoryADT m;
+    int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR);
+    m = _mapMem(fd);
     return m;
 }
 
@@ -61,13 +59,13 @@ int _openMem(char* id, int oflag, mode_t mode) {
     return fd;
 }
 void _trunMem(int fd) {
-    if(ftruncate(fd, MEMORY_SIZE) == -1) {
+    if(ftruncate(fd, sizeof(memoryCDT)) == -1) {
         perror("ftruncate");
         exit(EXIT_FAILURE);
     }
 }
-char* _mapMem(int fd) {
-    char* aux = mmap(NULL, MEMORY_SIZE, PROT_WRITE, MAP_SHARED, fd, 0);
+memoryADT _mapMem(int fd) {
+    char* aux = mmap(NULL, sizeof(memoryCDT), PROT_WRITE, MAP_SHARED, fd, 0);
     if(aux == MAP_FAILED) {
         perror("mmap");
         exit(EXIT_FAILURE);

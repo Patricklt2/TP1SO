@@ -13,5 +13,4 @@ char* getMemoryMap(memoryADT memory);
 
 char* getMemoryID(memoryADT memory);
 
-
 #endif //TP1SO_MEMORYADT_H

@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
 #include "memoryADT.h"
 
 #define SLAVENUM 5
@@ -22,10 +23,8 @@ int calculateSlavesNum(int fAmount);
 
 int main(int argc, char *argv[]) {
     int currentFile=0;
-
     int slavesNum = calculateSlavesNum(argc - 1);
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
-
     /*
     for(int i=0;i<slavesNum;i++){
         open(pipes[i].master_a_slave);//todo de ver como manipular los pipes
@@ -45,6 +44,7 @@ int main(int argc, char *argv[]) {
         }
     }
 */
+
     memoryADT mem = createSharedMem();
     //prints on stdout the information necessary for the vista process to connect
     sleep(2);
