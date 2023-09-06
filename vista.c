@@ -8,16 +8,25 @@
 #include <semaphore.h>
 #include "memoryADT.h"
 
+#define BUFFER_SIZE 128
+
 int getMemoryAddress(char* pName, char* buffer);
 
 int main(int argc, char* argv[]) {
-    char appOutput[50];
-    char buffer[128];
+    char appOutput[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE];
 
-    if(argc > 1) {
-        if(getMemoryAddress(argv[1], appOutput) == -1) {
+    if(isatty(fileno(stdin))) {
+        if(argc > 1) {
+            if(getMemoryAddress(argv[1], appOutput) == -1) {
+                return 1;
+            }
+        } else {
+            perror("The vista process was not given any processes to read from\n");
             return 1;
         }
+    } else {
+        fgets(appOutput, BUFFER_SIZE, stdin);
     }
 
 
@@ -28,7 +37,6 @@ int main(int argc, char* argv[]) {
     sem_t* appSem = getMemorySem(sharedMem);
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
-    printf("\n");
     for(int i=0; i<2; i++) {
         sem_wait(appSem);
         strcpy(buffer, mapPtr);
@@ -39,9 +47,11 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+
+
 int getMemoryAddress(char* pName, char* buffer) {
     int appPid;
-    char command[256];
+    char command[BUFFER_SIZE];
     sprintf(command, "pgrep %s", pName);
 
     FILE *fp = popen(command, "r");
@@ -63,7 +73,7 @@ int getMemoryAddress(char* pName, char* buffer) {
             appPid);
 
     FILE *input = popen(command, "r");
-    fgets(buffer, 50, input);
+    fgets(buffer, BUFFER_SIZE, input);
     pclose(input);
     pclose(fp);
     return 0;
