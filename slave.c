@@ -66,7 +66,7 @@ int main() {
             close(pipe_fds[i][0]);
             i++;
 
-            if(i == 20){  //Para ese entonces el proceso hijo 0 ya va a haber terminado, entonces puedo rehusar el fd
+            if(i == NUM_CHILD){  //Para ese entonces el proceso hijo 0 ya va a haber terminado, entonces puedo rehusar el fd
                 i = 0;
             }
         }
