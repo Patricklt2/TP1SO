@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
 
 int connectToApp(char* buffer, int argc, char* argv[]) {
     if (argc < 2 && !isatty(fileno(stdin))) {
-        fgets(buffer, BUFFER_SIZE, stdin);
+        read(STDIN_FILENO, buffer, BUFFER_SIZE);
         return 0;
     }
     else if(getMemoryAddress(argv[1], buffer) != -1) {
@@ -91,7 +91,7 @@ int getMemoryAddress(char* pName, char* buffer) {
             appPid);
 
     FILE *input = popen(command, "r");
-    fgets(buffer, BUFFER_SIZE, input);
+    read(fileno(input), buffer, BUFFER_SIZE);
     pclose(input);
     pclose(fp);
     return 0;
