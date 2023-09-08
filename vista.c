@@ -12,29 +12,33 @@
 
 int getMemoryAddress(char* pName, char* buffer);
 void writeOutput(memoryADT mem);
+int connectToApp(char* buffer, int argc, char* argv[]);
 
 int main(int argc, char* argv[]) {
     char appOutput[BUFFER_SIZE];
 
-    if(isatty(fileno(stdin))) {
-        if(argc > 1) {
-            if(getMemoryAddress(argv[1], appOutput) == -1) {
-                return 1;
-            }
-        } else {
-            perror("The vista process was not given any processes to read from\n");
-            return 1;
-        }
-    } else {
-        fgets(appOutput, BUFFER_SIZE, stdin);
+    if(connectToApp(appOutput, argc, argv) == -1) {
+        perror("the vista process failed to connect to the application process\n");
+        return 1;
     }
-
 
     memoryADT sharedMem = openExistingMemory(appOutput);
 
     writeOutput(sharedMem);
 
     return 0;
+}
+
+int connectToApp(char* buffer, int argc, char* argv[]) {
+    if (argc < 2 && !isatty(fileno(stdin))) {
+        fgets(buffer, BUFFER_SIZE, stdin);
+        return 0;
+    }
+    else if(getMemoryAddress(argv[1], buffer) != -1) {
+        putc('\n', stdout);
+        return 0;
+    }
+    return -1;
 }
 
 void writeOutput(memoryADT mem) {
@@ -56,7 +60,6 @@ void writeOutput(memoryADT mem) {
                 return;
             }
         }
-
         sem_wait(appSem);
         strcpy(buffer, mapPtr);
         printf("%s", buffer);
@@ -76,7 +79,7 @@ int getMemoryAddress(char* pName, char* buffer) {
     }
 
     if (fscanf(fp, "%d", &appPid) != 1) {
-        fprintf(stderr, "Couldn't find a process related to %s\n", pName);
+        fprintf(stderr, "could not find a process related to %s\n", pName);
         pclose(fp);
         return -1;
     }
