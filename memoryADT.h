@@ -3,12 +3,17 @@
 
 #include <semaphore.h>
 #define MEMORY_SIZE 1048576
+#define FLAGS_NUM 5
 
 typedef struct memoryCDT* memoryADT;
 
 memoryADT createSharedMem();
 
 memoryADT openExistingMemory(char* id);
+
+void setFlag(memoryADT memory, int value);
+
+int getFlag(memoryADT memory);
 
 char* getMemoryMap(memoryADT memory);
 

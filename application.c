@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
         enqueue(q,argv[i]);
     }
 
-
     int slavesNum = calculateSlavesNum(argc);//ver bien de como calcular la cant de slaves
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
     for(int i=0;i<slavesNum;i++){
@@ -53,8 +52,10 @@ int main(int argc, char *argv[]) {
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
     }
-
+    sleep(2);
     memoryADT mem = createSharedMem();
+    fputs(getMemoryID(mem), stdout);
+
     //prints on stdout the information necessary for the vista process to connect
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
@@ -68,6 +69,10 @@ int main(int argc, char *argv[]) {
         buff[len]='\0';
         i++;
     }
+
+
+
+
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
     //de paso ver como hacer para que
     char* str1 = "Hello Barbie\n";
@@ -88,6 +93,9 @@ int main(int argc, char *argv[]) {
     //assigns a new file to the slave process, if there's none left, the slave is killed
 
     //once all the slaves finish, writes to the result file and returns
+
+    setFlag(mem, 1);
+
     free(pipes);
 }
 

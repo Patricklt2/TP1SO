@@ -12,6 +12,7 @@
 
 typedef struct memoryCDT{
     char fileID[64];
+    int flag;
     sem_t sem;
     char map[MEMORY_SIZE];
 } memoryCDT;
@@ -34,6 +35,8 @@ memoryADT createSharedMem() {
         perror("sem_init");
         exit(EXIT_FAILURE);
     }
+
+    m->flag = 0;
     return m;
 }
 
@@ -42,6 +45,14 @@ memoryADT openExistingMemory(char* id) {
     int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR);
     m = _mapMem(fd);
     return m;
+}
+
+void setFlag(memoryADT memory, int value) {
+    memory->flag = value;
+}
+
+int getFlag(memoryADT memory) {
+    return memory->flag;
 }
 
 sem_t* getMemorySem(memoryADT memory) {
