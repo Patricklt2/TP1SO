@@ -10,7 +10,6 @@ typedef struct FileNode {
 } FileNode;
 
 typedef struct FileQueue {
-    int cantfiles;
     FileNode* front;
     FileNode* rear;
 } FileQueue;
@@ -21,18 +20,19 @@ Fqueue newQueue() {
         perror("malloc machine broke \n");
         exit(1);
     }
-    queue->cantfiles=0;
     queue->front = queue->rear = NULL;
     return queue;
 }
-
+int isempty(Fqueue queue){
+    return queue->front==NULL;
+}
 void enqueue(Fqueue queue, const char* path) {
     if (queue == NULL || path == NULL )
         return;
     struct dirent* entry;
     DIR* dir = opendir(path);
     if (dir == NULL) {
-        FileNode* newNode = malloc(sizeof(FileNode));
+    FileNode* newNode = malloc(sizeof(FileNode));
         if (newNode == NULL) {
             perror("malloc machine broke\n");
             exit(EXIT_FAILURE);
@@ -46,15 +46,14 @@ void enqueue(Fqueue queue, const char* path) {
             queue->rear->next = newNode;
             queue->rear = newNode;
         }
-        queue->cantfiles++;
         return;
     }
 
     while ((entry = readdir(dir)) != NULL) {
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
             continue;
-        char filePath[512]; // Adjust the size as needed
-        snprintf(filePath, sizeof(filePath), "%s/%s", path, entry->d_name);
+        char filePath[212];
+        snprintf(filePath, strlen(path)+strlen(entry->d_name)+1, "%s/%s", path, entry->d_name);
         enqueue(queue, filePath);
     }
     closedir(dir);
@@ -63,11 +62,13 @@ void enqueue(Fqueue queue, const char* path) {
 
 void dequeue(Fqueue queue,char* buff) {
     if (queue->front == NULL){
+        free(queue);
         buff=NULL;
         return;
     }
+
     FileNode* temp = queue->front;
-    strcpy(buff,temp->filename);
+    strncpy(buff,temp->filename,strlen(temp->filename)+1);
 
     queue->front = queue->front->next;
     free(temp);

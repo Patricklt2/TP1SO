@@ -7,5 +7,5 @@ Fqueue newQueue();
 
 void dequeue(Fqueue queue,char* buff);
 void enqueue(Fqueue queue, const char* path);
-
+int isempty(Fqueue queue);
 #endif
