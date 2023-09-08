@@ -11,43 +11,61 @@
 #define BUFFER_SIZE 128
 
 int getMemoryAddress(char* pName, char* buffer);
+void writeOutput(memoryADT mem);
+int connectToApp(char* buffer, int argc, char* argv[]);
 
 int main(int argc, char* argv[]) {
     char appOutput[BUFFER_SIZE];
-    char buffer[BUFFER_SIZE];
 
-    if(isatty(fileno(stdin))) {
-        if(argc > 1) {
-            if(getMemoryAddress(argv[1], appOutput) == -1) {
-                return 1;
-            }
-        } else {
-            perror("The vista process was not given any processes to read from\n");
-            return 1;
-        }
-    } else {
-        fgets(appOutput, BUFFER_SIZE, stdin);
+    if(connectToApp(appOutput, argc, argv) == -1) {
+        perror("the vista process failed to connect to the application process\n");
+        return 1;
     }
 
-
     memoryADT sharedMem = openExistingMemory(appOutput);
-    char* memMap = getMemoryMap(sharedMem);
+
+    writeOutput(sharedMem);
+
+    return 0;
+}
+
+int connectToApp(char* buffer, int argc, char* argv[]) {
+    if (argc < 2 && !isatty(fileno(stdin))) {
+        fgets(buffer, BUFFER_SIZE, stdin);
+        return 0;
+    }
+    else if(getMemoryAddress(argv[1], buffer) != -1) {
+        putc('\n', stdout);
+        return 0;
+    }
+    return -1;
+}
+
+void writeOutput(memoryADT mem) {
+    char buffer[BUFFER_SIZE];
+    char* memMap = getMemoryMap(mem);
     char* mapPtr = memMap;
+    sem_t* appSem = getMemorySem(mem);
+    int semValue;
 
-    sem_t* appSem = getMemorySem(sharedMem);
+    while(1) {
+        if(getFlag(mem) == 1) {
 
-    //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
-    for(int i=0; i<2; i++) {
+            if(sem_getvalue(appSem, &semValue) == -1) {
+                perror("sem_getvalue");
+                exit(EXIT_FAILURE);
+            }
+
+            if(semValue == 0){
+                return;
+            }
+        }
         sem_wait(appSem);
         strcpy(buffer, mapPtr);
         printf("%s", buffer);
         mapPtr += strlen(buffer) + 1;
     }
-
-    return 0;
 }
-
-
 
 int getMemoryAddress(char* pName, char* buffer) {
     int appPid;
@@ -61,7 +79,7 @@ int getMemoryAddress(char* pName, char* buffer) {
     }
 
     if (fscanf(fp, "%d", &appPid) != 1) {
-        fprintf(stderr, "Couldn't find a process related to %s\n", pName);
+        fprintf(stderr, "could not find a process related to %s\n", pName);
         pclose(fp);
         return -1;
     }
