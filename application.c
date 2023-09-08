@@ -61,13 +61,16 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
     char buff[100];
+    char buffWrite[100];
     int i=0;
     while(!isempty(q)){
         dequeue(q,buff);
-        write(pipes[i%slavesNum].master_a_slave[1],buff,sizeof(buff));
-        ssize_t len=read(pipes[i%slavesNum].slave_a_master[0],buff,sizeof(buff));
-        buff[len]='\0';
+        write(pipes[i%slavesNum].master_a_slave[0],buff,sizeof(buff));
+        ssize_t len=read(pipes[i%slavesNum].slave_a_master[1],buffWrite,sizeof(buffWrite));
+        buffWrite[len]='\0';
+        printf("%s",buffWrite);
         i++;
+        sleep(1);
     }
 
 
