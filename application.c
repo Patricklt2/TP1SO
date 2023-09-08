@@ -30,7 +30,6 @@ int main(int argc, char *argv[]) {
         exit(1);
     sem_t* vistaSem;
 
-
     int slavesNum = calculateSlavesNum(argc);//ver bien de como calcular la cant de slaves
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
     for(int i=0;i<slavesNum;i++){
@@ -58,6 +57,9 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
+    sleep(2);
+    fputs(getMemoryID(mem), stdout);
+
 
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
@@ -80,6 +82,9 @@ int main(int argc, char *argv[]) {
     //assigns a new file to the slave process, if there's none left, the slave is killed
 
     //once all the slaves finish, writes to the result file and returns
+
+    setFlag(mem, 1);
+
     free(pipes);
 }
 

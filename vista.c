@@ -11,10 +11,10 @@
 #define BUFFER_SIZE 128
 
 int getMemoryAddress(char* pName, char* buffer);
+void writeOutput(memoryADT mem);
 
 int main(int argc, char* argv[]) {
     char appOutput[BUFFER_SIZE];
-    char buffer[BUFFER_SIZE];
 
     if(isatty(fileno(stdin))) {
         if(argc > 1) {
@@ -31,23 +31,38 @@ int main(int argc, char* argv[]) {
 
 
     memoryADT sharedMem = openExistingMemory(appOutput);
-    char* memMap = getMemoryMap(sharedMem);
+
+    writeOutput(sharedMem);
+
+    return 0;
+}
+
+void writeOutput(memoryADT mem) {
+    char buffer[BUFFER_SIZE];
+    char* memMap = getMemoryMap(mem);
     char* mapPtr = memMap;
+    sem_t* appSem = getMemorySem(mem);
+    int semValue;
 
-    sem_t* appSem = getMemorySem(sharedMem);
+    while(1) {
+        if(getFlag(mem) == 1) {
 
-    //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
-    for(int i=0; i<2; i++) {
+            if(sem_getvalue(appSem, &semValue) == -1) {
+                perror("sem_getvalue");
+                exit(EXIT_FAILURE);
+            }
+
+            if(semValue == 0){
+                return;
+            }
+        }
+
         sem_wait(appSem);
         strcpy(buffer, mapPtr);
         printf("%s", buffer);
         mapPtr += strlen(buffer) + 1;
     }
-
-    return 0;
 }
-
-
 
 int getMemoryAddress(char* pName, char* buffer) {
     int appPid;
