@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include "memoryADT.h"
 
+
 #define SLAVENUM 5
 #define FILES_PER_SLAVENUM 20
 #define MAXFILESPERSLAVE 2
@@ -23,41 +24,44 @@ typedef struct pipechannles{
 int calculateSlavesNum(int fAmount);
 
 int main(int argc, char *argv[]) {
-    int currentFile=0;
-    sem_t* vistaSem;
-    int slavesNum = calculateSlavesNum(argc - 1);
+    char buff[256];
 
+    if(argc<=2)
+        exit(1);
+    sem_t* vistaSem;
+
+
+    int slavesNum = calculateSlavesNum(argc);//ver bien de como calcular la cant de slaves
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
-    /*
     for(int i=0;i<slavesNum;i++){
-        open(pipes[i].master_a_slave);//todo de ver como manipular los pipes
-        open(pipes[i].slave_a_master);
+        if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
+            perror("pipe machine broke\n");
+            exit(1);
+        }
         if((pipes[i].pid=fork())==0){
             close(pipes[i].master_a_slave[1]);
             close(pipes[i].slave_a_master[0]);
             dup2(pipes[i].slave_a_master[1],STDOUT_FILENO);
             dup2(pipes[i].master_a_slave[0],STDIN_FILENO);
-            break;
+            execve("./slave.out",NULL,NULL);
          }
-        else{
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
-            dup2(pipes[i].slave_a_master[0],STDIN_FILENO);
-            dup2(pipes[i].master_a_slave[1],STDOUT_FILENO);
-        }
     }
-*/
+    /*
+    write(pipes[i].master_a_slave[1],etc etc) para escribri
+    read(pipes[i].slave_a_master[0],etc etc) para leer
+    */
     memoryADT mem = createSharedMem();
     //prints on stdout the information necessary for the vista process to connect
-    fputs(getMemoryID(mem), stdout);
-
-    sleep(2);
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
 
+
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
+    //de paso ver como hacer para que
     char* str1 = "Hello Barbie\n";
     char* str2 = "Hello Ken\n";
 
@@ -83,3 +87,6 @@ int main(int argc, char *argv[]) {
 int calculateSlavesNum(int fAmount) {
     return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);
 }
+
+
+
