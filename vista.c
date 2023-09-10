@@ -63,7 +63,8 @@ void writeOutput(memoryADT mem) {
 
     while(1) {
         if(getFlag(mem) == 1) {
-
+            //this is not for busy waiting, but instead to prevent the vista process from
+            //waiting on an unlinked semaphore
             if(sem_getvalue(appSem, &semValue) == -1) {
                 perror("sem_getvalue");
                 exit(EXIT_FAILURE);

@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include "memoryADT.h"
 #include "queuefile.h"
+#include "publicInfo.h"
 
 #define SLAVENUM 5
 #define FILES_PER_SLAVENUM 20
@@ -61,13 +62,14 @@ int main(int argc, char *argv[]) {
     }
 
     memoryADT mem = createSharedMem();
-    write(stdout, getMemoryID(mem), strlen(getMemoryID(mem)));
-    sleep(2);
+    write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
+    sem_post(memReadySem);
 
     //prints on stdout the information necessary for the vista process to connect
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
+
     char buff[100];
     char buffWrite[100];
     int i=0;
@@ -84,8 +86,8 @@ int main(int argc, char *argv[]) {
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
     //de paso ver como hacer para que
-    char* str1 = "Hello Barbie\n";
-    char* str2 = "Hello Ken\n";
+    char* str1 = "Hey Barbie\n";
+    char* str2 = "Hey Ken\n";
 
     strcpy(mapPtr, str1);
     sem_post(vistaSem);
@@ -104,7 +106,9 @@ int main(int argc, char *argv[]) {
     //once all the slaves finish, writes to the result file and returns
 
     setFlag(mem, 1);
-    sem_unlink(memReadySem);
+
+    sleep(2);
+    sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
     free(pipes);
 }
