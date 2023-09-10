@@ -29,6 +29,13 @@ int main(int argc, char *argv[]) {
         exit(1);
     sem_t* vistaSem;
 
+    sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT | O_EXCL, S_IRUSR|S_IWUSR, 0);
+
+    if (memReadySem == SEM_FAILED) {
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
+
     Fqueue q = newQueue();
 
     for(int i=1;i<argc;i++){//encola todas las files al principio, ahorrandonos problemas de sincronizacion (espero)
@@ -52,9 +59,10 @@ int main(int argc, char *argv[]) {
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
     }
-    sleep(2);
+
     memoryADT mem = createSharedMem();
-    fputs(getMemoryID(mem), stdout);
+    write(stdout, getMemoryID(mem), strlen(getMemoryID(mem)));
+    sleep(2);
 
     //prints on stdout the information necessary for the vista process to connect
     char* memMap = getMemoryMap(mem);
@@ -69,8 +77,6 @@ int main(int argc, char *argv[]) {
         buff[len]='\0';
         i++;
     }
-
-
 
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
@@ -95,7 +101,8 @@ int main(int argc, char *argv[]) {
     //once all the slaves finish, writes to the result file and returns
 
     setFlag(mem, 1);
-
+    sem_unlink(memReadySem);
+    unlinkMemory(mem);
     free(pipes);
 }
 

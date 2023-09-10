@@ -12,7 +12,7 @@
 ~h
 # Command Line History (newest to oldest):
 :qa
-|2,0,1694006663,,"qa"
+|2,0,1694361154,,"qa"
 :wq!
 |2,0,1694006659,,"wq!"
 :wq
@@ -31,34 +31,198 @@
 # Registers:
 
 # File marks:
-'0  1  0  ~/output.txt
-|4,48,1,0,1694006663,"~/output.txt"
-'1  1  0  ~/output.txt
-|4,49,1,0,1694006640,"~/output.txt"
-'2  1  0  ~/output.txt
-|4,50,1,0,1694006620,"~/output.txt"
-'3  1  0  ~/output.txt
-|4,51,1,0,1694006620,"~/output.txt"
+'0  1  0  /dev/shm/CAIQhsTENVuvSJFz
+|4,48,1,0,1694361154,"/dev/shm/CAIQhsTENVuvSJFz"
+'1  1  0  /dev/shm/CAIQhsTENVuvSJFz
+|4,49,1,0,1694361090,"/dev/shm/CAIQhsTENVuvSJFz"
+'2  1  0  /dev/shm/Hl1DpZnFwuZImjRG
+|4,50,1,0,1694354146,"/dev/shm/Hl1DpZnFwuZImjRG"
+'3  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,51,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
 '4  1  0  ~/output.txt
-|4,52,1,0,1694006596,"~/output.txt"
+|4,52,1,0,1694006663,"~/output.txt"
 '5  1  0  ~/output.txt
-|4,53,1,0,1694006596,"~/output.txt"
+|4,53,1,0,1694006640,"~/output.txt"
 '6  1  0  ~/output.txt
-|4,54,1,0,1694006596,"~/output.txt"
+|4,54,1,0,1694006620,"~/output.txt"
 '7  1  0  ~/output.txt
-|4,55,1,0,1694006596,"~/output.txt"
+|4,55,1,0,1694006620,"~/output.txt"
+'8  1  0  ~/output.txt
+|4,56,1,0,1694006596,"~/output.txt"
+'9  1  0  ~/output.txt
+|4,57,1,0,1694006596,"~/output.txt"
 
 # Jumplist (newest first):
+-'  1  0  /dev/shm/CAIQhsTENVuvSJFz
+|4,39,1,0,1694361154,"/dev/shm/CAIQhsTENVuvSJFz"
+-'  1  0  /dev/shm/CAIQhsTENVuvSJFz
+|4,39,1,0,1694361090,"/dev/shm/CAIQhsTENVuvSJFz"
+-'  1  0  /dev/shm/Hl1DpZnFwuZImjRG
+|4,39,1,0,1694354146,"/dev/shm/Hl1DpZnFwuZImjRG"
+-'  1  0  /dev/shm/Hl1DpZnFwuZImjRG
+|4,39,1,0,1694354146,"/dev/shm/Hl1DpZnFwuZImjRG"
+-'  1  0  /dev/shm/Hl1DpZnFwuZImjRG
+|4,39,1,0,1694354146,"/dev/shm/Hl1DpZnFwuZImjRG"
+-'  1  0  /dev/shm/Hl1DpZnFwuZImjRG
+|4,39,1,0,1694354146,"/dev/shm/Hl1DpZnFwuZImjRG"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  /dev/shm/17aURyJkiW4l8N4g
+|4,39,1,0,1694269718,"/dev/shm/17aURyJkiW4l8N4g"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006663,"~/output.txt"
 -'  1  0  ~/output.txt
 |4,39,1,0,1694006663,"~/output.txt"
 -'  1  0  ~/output.txt
 |4,39,1,0,1694006640,"~/output.txt"
 -'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006640,"~/output.txt"
+-'  1  0  ~/output.txt
 |4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006620,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
+-'  1  0  ~/output.txt
+|4,39,1,0,1694006596,"~/output.txt"
 -'  1  0  ~/output.txt
 |4,39,1,0,1694006596,"~/output.txt"
 
 # History of marks within files (newest to oldest):
+
+> /dev/shm/CAIQhsTENVuvSJFz
+	*	1694361152	0
+	"	1	0
+
+> /dev/shm/Hl1DpZnFwuZImjRG
+	*	1694354143	0
+	"	1	0
+
+> /dev/shm/17aURyJkiW4l8N4g
+	*	1694269717	0
+	"	1	0
 
 > ~/output.txt
 	*	1694006657	0

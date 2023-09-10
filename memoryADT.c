@@ -9,9 +9,12 @@
 #include <sys/types.h>
 #include <semaphore.h>
 #include <string.h>
+#include <time.h>
+
+#define ID_LEN 13
 
 typedef struct memoryCDT{
-    char fileID[64];
+    char fileID[ID_LEN];
     int flag;
     sem_t sem;
     char map[MEMORY_SIZE];
@@ -20,13 +23,14 @@ typedef struct memoryCDT{
 
 int _openMem(char* id, int oflag, mode_t mode);
 void _trunMem(int fd);
+void _randomID(char* buffer);
 memoryADT _mapMem(int fd);
 
 memoryADT createSharedMem() {
-    //TODO generar nombre aleatorio
     memoryADT m;
-    char* id = "/placeholder2";
-    int fd = _openMem(id, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    char id[] = "placeholder";
+    _randomID(id);
+    int fd = _openMem(id, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
     _trunMem(fd);
     m = _mapMem(fd);
     strcpy(m->fileID, id);
@@ -45,6 +49,10 @@ memoryADT openExistingMemory(char* id) {
     int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR);
     m = _mapMem(fd);
     return m;
+}
+
+void unlinkMemory(memoryADT m) {
+    shm_unlink(m->fileID);
 }
 
 void setFlag(memoryADT memory, int value) {
@@ -71,7 +79,14 @@ char* getMemoryID(memoryADT memory) {
 //AUXILIARY FUNCTIONS
 //TODO manejar los errores mejor
 int _openMem(char* id, int oflag, mode_t mode) {
-    int fd = shm_open(id, oflag, mode);
+    if(strlen(id) > ID_LEN) {
+        perror("invalid mem id length\n");
+        exit(1);
+    }
+    char idAux[ID_LEN + 1];
+    idAux[0] = '/';
+    strcpy(idAux + 1, id);
+    int fd = shm_open(idAux, oflag, mode);
     if(fd == -1) {
         perror("shm_open");
         exit(EXIT_FAILURE);
@@ -91,4 +106,18 @@ memoryADT _mapMem(int fd) {
         exit(EXIT_FAILURE);
     }
     return aux;
+}
+
+void _randomID(char* buffer) {
+    srand(time(NULL));
+    char charSet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
+    int setSize = strlen(charSet);
+
+    int idx;
+    int i=0;
+    for(; i<ID_LEN - 1; i++) {
+        idx = rand() % setSize;
+        buffer[i] = charSet[idx];
+    }
+    buffer[i] = '\0';
 }
