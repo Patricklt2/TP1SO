@@ -14,10 +14,10 @@
 
 int auxMd5(char * fpath, char * extBuff){
     // comando para calcular el md5
-    char *command = malloc(sizeof(char)*100);
+    char *command = malloc(sizeof(char)*200);
     strcpy(command,"md5sum ");
     strcat(command, "\"");
-    strncat(command, fpath, strlen(fpath));
+    strcat(command, fpath);
     strcat(command, "\"");
 
     // Abrir pipe para captar el call
@@ -50,9 +50,9 @@ int main(int argc,char* argv[]){
     sem_t* semRead=getMemorySem(memRead);
     memoryADT memWrite=openExistingMemory(argv[1]);
     sem_t* semWrite=getMemorySem(memWrite);
-    char bufferWrite[128];  //Write to parent
-    char bufferRead[128];   //Read from parent
-    char aux[128];
+    char bufferWrite[200];  //Write to parent
+    char bufferRead[200];   //Read from parent
+    char aux[200];
     while(1){
         sem_post(semWrite);
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
