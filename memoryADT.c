@@ -22,22 +22,32 @@ typedef struct memoryCDT{
 
 
 int _openMem(char* id, int oflag, mode_t mode);
-void _trunMem(int fd);
+int _trunMem(int fd);
 void _randomID(char* buffer);
+void _unlinkMem(char* id);
 memoryADT _mapMem(int fd);
 
 memoryADT createSharedMem() {
     memoryADT m;
-    char id[] = "placeholder";
+    char id[ID_LEN];
     _randomID(id);
-    int fd = _openMem(id, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
-    _trunMem(fd);
-    m = _mapMem(fd);
+
+    if((int fd = _openMem(id, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR)) == -1)
+        return NULL;
+    if( _trunMem(fd) == -1) {
+        _unlinkMem(id);
+        return NULL;
+    }
+    if((m = _mapMem(fd)) == NULL) {
+        _unlinkMem(id)
+        return NULL;
+    }
+
     strcpy(m->fileID, id);
 
     if(sem_init(&m->sem, 1, 0) == -1){
-        perror("sem_init");
-        exit(EXIT_FAILURE);
+        _unlinkMem(id);
+        return NULL;
     }
 
     m->flag = 0;
@@ -45,14 +55,19 @@ memoryADT createSharedMem() {
 }
 
 memoryADT openExistingMemory(char* id) {
-    memoryADT m;
-    int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR);
-    m = _mapMem(fd);
+    if((int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR)) == -1)
+        return NULL;
+
+    if((memoryADT m = _mapMem(fd)) == NULL) {
+        _unlinkMem(id);
+        return NULL;
+    }
+
     return m;
 }
 
 void unlinkMemory(memoryADT m) {
-    shm_unlink(m->fileID);
+    _unlinkMem(m->fileID);
 }
 
 void setFlag(memoryADT memory, int value) {
@@ -77,35 +92,37 @@ char* getMemoryID(memoryADT memory) {
 
 
 //AUXILIARY FUNCTIONS
-//TODO manejar los errores mejor
 int _openMem(char* id, int oflag, mode_t mode) {
     if(strlen(id) > ID_LEN) {
-        perror("invalid mem id length\n");
-        exit(1);
+        return -1;
     }
     char idAux[ID_LEN + 1];
     idAux[0] = '/';
     strcpy(idAux + 1, id);
     int fd = shm_open(idAux, oflag, mode);
     if(fd == -1) {
-        perror("shm_open");
-        exit(EXIT_FAILURE);
+        return -1;
     }
     return fd;
 }
-void _trunMem(int fd) {
+int _trunMem(int fd) {
     if(ftruncate(fd, sizeof(memoryCDT)) == -1) {
-        perror("ftruncate");
-        exit(EXIT_FAILURE);
+        return -1;
     }
 }
 memoryADT _mapMem(int fd) {
     memoryADT aux = mmap(NULL, sizeof(memoryCDT), PROT_WRITE, MAP_SHARED, fd, 0);
     if(aux == MAP_FAILED) {
-        perror("mmap");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
     return aux;
+}
+
+void _unlinkMem(char* id) {
+    char idAux[ID_LEN + 1];
+    idAux[0] = '/';
+    strcpy(idAux + 1, id);
+    shm_unlink(id);
 }
 
 void _randomID(char* buffer) {

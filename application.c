@@ -24,6 +24,8 @@ typedef struct pipechannles{
 
 int calculateSlavesNum(int fAmount);
 
+
+//TODO agregar una funcion de exit global
 int main(int argc, char *argv[]) {
 
     if(argc<2)
@@ -61,7 +63,12 @@ int main(int argc, char *argv[]) {
             close(pipes[i].slave_a_master[1]);
     }
 
-    memoryADT mem = createSharedMem();
+    if( (memoryADT mem = createSharedMem()) == NULL) {
+        //TODO salir de una manera mas prolija, que no deje al vista bloqueado
+        perror("failed to create shared memory");
+        exit(1);
+    }
+
     write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
     sem_post(memReadySem);
 

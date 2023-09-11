@@ -29,11 +29,15 @@ int main(int argc, char* argv[]) {
 
     if(memReadySem == SEM_FAILED){
         perror("the vista process couldn't connect to the application process' public semaphore\n");
+        return 1;
     }
 
     sem_wait(memReadySem);
 
-    memoryADT sharedMem = openExistingMemory(appOutput);
+    if((memoryADT sharedMem = openExistingMemory(appOutput)) == NULL) {
+        perror("failed to open shared memory");
+        return 1;
+    }
 
     writeOutput(sharedMem);
 
