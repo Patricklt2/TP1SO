@@ -50,6 +50,7 @@ int main(int argc,char* argv[]){
     sem_t* semWrite=getMemorySem(memWrite);
     char bufferWrite[128];  //Write to parent
     char bufferRead[128];   //Read from parent
+    char aux[128];
     while(1){
         sem_post(semWrite);
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
@@ -59,8 +60,8 @@ int main(int argc,char* argv[]){
         if(i == NUM_CHILD)  //Para ese entonces el proceso hijo 0 ya va a haber terminado, entonces puedo rehusar el fd
             i = 0;
         sem_wait(semRead);
-        //printf("PID: %d %s\n", getpid(), bufferWrite);
-        write(STDOUT_FILENO,bufferWrite,strlen(bufferWrite));
+        sprintf(aux,"PID: %d %s\n", getpid(), bufferWrite);
+        write(STDOUT_FILENO,aux,strlen(aux));
 
     }
     exit(0);

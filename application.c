@@ -13,7 +13,7 @@
 #include "queuefile.h"
 #include "publicInfo.h"
 
-#define SLAVENUM 5
+#define SLAVENUM 2
 #define FILES_PER_SLAVENUM 20
 #define MAXFILESPERSLAVE 2
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
         enqueue(q,argv[i]);
     }
 
-    int slavesNum =1;//ver bien de como calcular la cant de slaves
+    int slavesNum =calculateSlavesNum(argc-1);//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
     for(int i=0;i<slavesNum;i++){
         if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
