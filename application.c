@@ -113,17 +113,6 @@ int main(int argc, char *argv[]) {
     free(q);
     fclose(fp);
 
-
-    //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
-    //de paso ver como hacer para que
-    char* str1 = "Hey Barbie\n";
-    char* str2 = "Hey Ken\n";
-
-
-
-    strcpy(mapPtr, str2);
-    sem_post(vistaSem);
-
     //decides how many slave processes need to be created and initializes them
 
     //waits until a slave process finishes, and writes the result on the buffer
@@ -136,7 +125,9 @@ int main(int argc, char *argv[]) {
 
     sleep(2);
     sem_unlink(MEM_READY_SEM);
-    //unlinkMemory(mem);
+    unlinkMemory(mem);
+    unlinkMemory(readmem);
+    unlinkMemory(writemem);
     for(int i=0;i<slavesNum;i++){
         close(pipes[i].slave_a_master[1]);
         close(pipes[i].master_a_slave[0]);
