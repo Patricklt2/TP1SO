@@ -5,7 +5,7 @@
 #include "queuefile.h"
 
 typedef struct FileNode {
-    char filename[100]; // Adjust the size as needed
+    char filename[400]; // Adjust the size as needed
     struct FileNode* next;
 } FileNode;
 
@@ -24,7 +24,12 @@ Fqueue newQueue() {
     return queue;
 }
 int isempty(Fqueue queue){
-    return queue->front==NULL;
+
+    if (queue->front == NULL){
+        free(queue);
+        return 1;
+    }
+    return 0;
 }
 void enqueue(Fqueue queue, const char* path) {
     if (queue == NULL || path == NULL )
@@ -61,10 +66,6 @@ void enqueue(Fqueue queue, const char* path) {
 
 
 void dequeue(Fqueue queue,char* buff) {
-    if (queue->front == NULL){
-        free(queue);
-        return;
-    }
 
     FileNode* temp = queue->front;
     strncpy(buff,temp->filename,strlen(temp->filename)+1);

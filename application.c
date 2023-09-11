@@ -52,12 +52,13 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    /*
     Fqueue q = newQueue();
 
     for(int i=1;i<argc;i++){//encola todas las files al principio, ahorrandonos problemas de sincronizacion (espero)
         enqueue(q,argv[i]);
     }
-
+    */
     int slavesNum =calculateSlavesNum(argc-1);//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
     for(int i=0;i<slavesNum;i++){
@@ -93,15 +94,15 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
-    char buff[100];
+   // char buff[100];
     char buffWrite[100];
-    int i=0;
-    while(!isempty(q)){
-        dequeue(q,buff);
+    int i=1;
+    while(i < argc){
+        //dequeue(q,buff);
         sem_wait(memwriteSem);
-        write(pipes[i%slavesNum].master_a_slave[1],buff,strlen(buff));
+        write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],argv[i]);
         sem_post(memreadSem);
-        ssize_t len=read(pipes[i%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
+        ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
         if(len<0){printf("error en read\n");exit(1);}
         buffWrite[len]='\0';
         fprintf(fp,"%s\n",buffWrite);
@@ -110,16 +111,8 @@ int main(int argc, char *argv[]) {
         mapPtr += strlen(buffWrite) + 1;
         i++;
     }
-    free(q);
+
     fclose(fp);
-
-
-    //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
-    //de paso ver como hacer para que
-    char* str1 = "Hey Barbie\n";
-    char* str2 = "Hey Ken\n";
-
-
 
     strcpy(mapPtr, str2);
     sem_post(vistaSem);
