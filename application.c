@@ -30,7 +30,16 @@ int main(int argc, char *argv[]) {
         exit(1);
     sem_t* vistaSem;
 
-    sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT | O_EXCL, S_IRUSR|S_IWUSR, 0);
+    sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
+
+    memoryADT readmem=createSharedMem();
+    char* memreadId=getMemoryID(readmem);
+    sem_t* memreadSem=getMemorySem(readmem);
+    memoryADT writemem=createSharedMem();
+    sem_t* memwriteSem=getMemorySem(writemem);
+    char* memwriteId=getMemoryID(writemem);
+
+    char* argvs[]={memreadId,memwriteId,NULL};
 
     if (memReadySem == SEM_FAILED) {
         perror("sem_open");
@@ -43,7 +52,7 @@ int main(int argc, char *argv[]) {
         enqueue(q,argv[i]);
     }
 
-    int slavesNum = calculateSlavesNum(argc-2);//ver bien de como calcular la cant de slaves
+    int slavesNum =1;//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
     for(int i=0;i<slavesNum;i++){
         if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
@@ -57,7 +66,7 @@ int main(int argc, char *argv[]) {
             dup(pipes[i].slave_a_master[1]);
             close(STDIN_FILENO);
             dup(pipes[i].master_a_slave[0]);
-            execve("./slave.out",NULL,NULL);
+            execve("./slave.out",argvs,NULL);
          }
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
@@ -77,14 +86,17 @@ int main(int argc, char *argv[]) {
     int i=0;
     while(!isempty(q)){
         dequeue(q,buff);
-        sleep(1);
+        sem_wait(memwriteSem);
         write(pipes[i%slavesNum].master_a_slave[1],buff,strlen(buff));
+
+
         ssize_t len=read(pipes[i%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
+        sem_post(memreadSem);
         if(len<0){printf("error en read\n");exit(1);}
         buffWrite[len]='\0';
-        printf("PID: %s",buffWrite);
         i++;
     }
+    free(q);
 
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
@@ -113,7 +125,11 @@ int main(int argc, char *argv[]) {
     sleep(2);
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
-    free(pipes);
+    for(int i=0;i<slavesNum;i++){
+        close(pipes[i].slave_a_master[1]);
+        close(pipes[i].master_a_slave[0]);
+        kill(pipes[i].pid,1);
+    }
 }
 
 

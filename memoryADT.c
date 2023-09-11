@@ -28,7 +28,7 @@ memoryADT _mapMem(int fd);
 
 memoryADT createSharedMem() {
     memoryADT m;
-    char id[] = "placeholder";
+    char id[ID_LEN];
     _randomID(id);
     int fd = _openMem(id, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
     _trunMem(fd);
