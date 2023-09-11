@@ -10,7 +10,6 @@
 #include <semaphore.h>
 #include <time.h>
 #include "memoryADT.h"
-#include "queuefile.h"
 #include "publicInfo.h"
 
 #define SLAVENUM 2
@@ -52,14 +51,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    /*
-    Fqueue q = newQueue();
-
-    for(int i=1;i<argc;i++){//encola todas las files al principio, ahorrandonos problemas de sincronizacion (espero)
-        enqueue(q,argv[i]);
-    }
-    */
-    int slavesNum =calculateSlavesNum(argc-1);//ver bien de como calcular la cant de slaves
+    int slavesNum =5;//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
     for(int i=0;i<slavesNum;i++){
         if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
@@ -94,11 +86,9 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
-   // char buff[100];
     char buffWrite[100];
     int i=1;
     while(i < argc){
-        //dequeue(q,buff);
         sem_wait(memwriteSem);
         write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],strlen(argv[i]));
         sem_post(memreadSem);
