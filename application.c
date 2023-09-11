@@ -47,23 +47,24 @@ int main(int argc, char *argv[]) {
 
     int slavesNum = calculateSlavesNum(argc);//ver bien de como calcular la cant de slaves
     pipechannels *pipes = malloc(slavesNum * (sizeof(pipechannels)));
-    for(int i=0;i<slavesNum;i++){
-        if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
+    for(int i=0;i<slavesNum;i++) {
+        if (pipe(pipes[i].master_a_slave) == -1 || pipe(pipes[i].slave_a_master) == -1) {
             perror("pipe machine broke\n");
             exit(1);
         }
-        if((pipes[i].pid=fork())==0){
+        if ((pipes[i].pid = fork()) == 0) {
             close(pipes[i].master_a_slave[1]);
             close(pipes[i].slave_a_master[0]);
-            dup2(pipes[i].slave_a_master[1],STDOUT_FILENO);
-            dup2(pipes[i].master_a_slave[0],STDIN_FILENO);
-            execve("./slave.out",NULL,NULL);
-         }
-            close(pipes[i].master_a_slave[0]);
-            close(pipes[i].slave_a_master[1]);
+            dup2(pipes[i].slave_a_master[1], STDOUT_FILENO);
+            dup2(pipes[i].master_a_slave[0], STDIN_FILENO);
+            execve("./slave.out", NULL, NULL);
+        }
+        close(pipes[i].master_a_slave[0]);
+        close(pipes[i].slave_a_master[1]);
     }
 
-    if( (memoryADT mem = createSharedMem()) == NULL) {
+    memoryADT mem = createSharedMem();
+    if(mem == NULL) {
         //TODO salir de una manera mas prolija, que no deje al vista bloqueado
         perror("failed to create shared memory");
         exit(1);

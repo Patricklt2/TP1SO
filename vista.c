@@ -33,14 +33,13 @@ int main(int argc, char* argv[]) {
     }
 
     sem_wait(memReadySem);
-
-    if((memoryADT sharedMem = openExistingMemory(appOutput)) == NULL) {
+    memoryADT sharedMem = openExistingMemory(appOutput);
+    if(sharedMem == NULL) {
         perror("failed to open shared memory");
         return 1;
     }
 
     writeOutput(sharedMem);
-
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(sharedMem);
     return 0;

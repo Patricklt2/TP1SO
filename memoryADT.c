@@ -32,14 +32,16 @@ memoryADT createSharedMem() {
     char id[ID_LEN];
     _randomID(id);
 
-    if((int fd = _openMem(id, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR)) == -1)
+    int fd = _openMem(id, O_CREAT | O_RDWR | O_EXCL, S_IRUSR | S_IWUSR);
+    if(fd == -1)
         return NULL;
     if( _trunMem(fd) == -1) {
         _unlinkMem(id);
         return NULL;
     }
-    if((m = _mapMem(fd)) == NULL) {
-        _unlinkMem(id)
+    m = _mapMem(fd);
+    if(m == NULL) {
+        _unlinkMem(id);
         return NULL;
     }
 
@@ -55,10 +57,11 @@ memoryADT createSharedMem() {
 }
 
 memoryADT openExistingMemory(char* id) {
-    if((int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR)) == -1)
+    int fd = _openMem(id, O_RDWR, S_IRUSR | S_IWUSR);
+    if(fd == -1)
         return NULL;
-
-    if((memoryADT m = _mapMem(fd)) == NULL) {
+    memoryADT m = _mapMem(fd);
+    if(m == NULL) {
         _unlinkMem(id);
         return NULL;
     }
