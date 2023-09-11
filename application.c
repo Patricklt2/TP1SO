@@ -129,7 +129,9 @@ int main(int argc, char *argv[]) {
 
     sleep(2);
     sem_unlink(MEM_READY_SEM);
-    //unlinkMemory(mem);
+    unlinkMemory(mem);
+    unlinkMemory(readmem);
+    unlinkMemory(writemem);
     for(int i=0;i<slavesNum;i++){
         close(pipes[i].slave_a_master[1]);
         close(pipes[i].master_a_slave[0]);

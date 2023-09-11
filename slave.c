@@ -66,5 +66,8 @@ int main(int argc,char* argv[]){
         write(STDOUT_FILENO,aux,strlen(aux));
 
     }
+
+    unlinkMemory(memRead);
+    unlinkMemory(memWrite);
     exit(0);
 }
