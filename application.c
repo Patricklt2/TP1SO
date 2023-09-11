@@ -97,12 +97,11 @@ int main(int argc, char *argv[]) {
         dequeue(q,buff);
         sem_wait(memwriteSem);
         write(pipes[i%slavesNum].master_a_slave[1],buff,strlen(buff));
-
-
-        ssize_t len=read(pipes[i%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
         sem_post(memreadSem);
+        ssize_t len=read(pipes[i%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
         if(len<0){printf("error en read\n");exit(1);}
         buffWrite[len]='\0';
+        write(STDOUT_FILENO,buffWrite,strlen(buffWrite));
         i++;
     }
     free(q);

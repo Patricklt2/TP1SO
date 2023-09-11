@@ -13,7 +13,7 @@ VISTA_OBJECTS = $(VISTA_SOURCES:.c=.o)
 VISTA_EXECUTABLE = vista.out
 
 # Source files for the slave target
-SLAVE_SOURCES = slave.c
+SLAVE_SOURCES = slave.c memoryADT.c
 SLAVE_OBJECTS = $(SLAVE_SOURCES:.c=.o)
 SLAVE_EXECUTABLE = slave.out
 

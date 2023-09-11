@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <libgen.h>
+#include <semaphore.h>
+#include "memoryADT.h"
 
 #define NUM_CHILD 20
 #define TRUE 1
@@ -14,7 +16,7 @@ int auxMd5(char * fpath, char * extBuff){
     // comando para calcular el md5
     char *command = malloc(sizeof(char)*100);
     strcpy(command,"md5sum ");
-    strcat(command, fpath);
+    strncat(command, fpath, strlen(fpath));
 
     // Abrir pipe para captar el call
     FILE *fp = popen(command, "r");
@@ -38,21 +40,28 @@ int auxMd5(char * fpath, char * extBuff){
     return 0;
 }
 
-int main(){
+int main(int argc,char* argv[]){
     int i = 0;
+    if(argc!=2)
+        exit(1);
+    memoryADT memRead=openExistingMemory(argv[0]);
+    sem_t* semRead=getMemorySem(memRead);
+    memoryADT memWrite=openExistingMemory(argv[1]);
+    sem_t* semWrite=getMemorySem(memWrite);
     char bufferWrite[128];  //Write to parent
     char bufferRead[128];   //Read from parent
-
-    while(TRUE){
+    while(1){
+        sem_post(semWrite);
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
+        if(bytes_r<0){printf("reoto todo\n");exit(1);}
         bufferRead[bytes_r] = '\0';
-
         auxMd5(bufferRead,bufferWrite);
         if(i == NUM_CHILD)  //Para ese entonces el proceso hijo 0 ya va a haber terminado, entonces puedo rehusar el fd
             i = 0;
+        sem_wait(semRead);
+        //printf("PID: %d %s\n", getpid(), bufferWrite);
+        write(STDOUT_FILENO,bufferWrite,strlen(bufferWrite));
 
-        printf("%d %s\n", getpid(), bufferWrite);
     }
-
     exit(0);
 }

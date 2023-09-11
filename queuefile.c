@@ -63,7 +63,6 @@ void enqueue(Fqueue queue, const char* path) {
 void dequeue(Fqueue queue,char* buff) {
     if (queue->front == NULL){
         free(queue);
-        buff=NULL;
         return;
     }
 
