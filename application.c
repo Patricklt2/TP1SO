@@ -33,6 +33,9 @@ int main(int argc, char *argv[]) {
         exit(1);
     sem_t* vistaSem;
 
+    FILE* fp;
+    if(fp=fopen("archivo", "w"));
+
     sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
 
     memoryADT readmem=createSharedMem();
@@ -101,10 +104,14 @@ int main(int argc, char *argv[]) {
         ssize_t len=read(pipes[i%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
         if(len<0){printf("error en read\n");exit(1);}
         buffWrite[len]='\0';
-        write(STDOUT_FILENO,buffWrite,strlen(buffWrite));
+        fprintf(fp,"%s\n",buffWrite);
+        strcpy(mapPtr, buffWrite);
+        sem_post(vistaSem);
+        mapPtr += strlen(buffWrite) + 1;
         i++;
     }
     free(q);
+    fclose(fp);
 
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
@@ -112,10 +119,7 @@ int main(int argc, char *argv[]) {
     char* str1 = "Hey Barbie\n";
     char* str2 = "Hey Ken\n";
 
-    strcpy(mapPtr, str1);
-    sem_post(vistaSem);
 
-    mapPtr += strlen(str1) + 1;
 
     strcpy(mapPtr, str2);
     sem_post(vistaSem);
@@ -132,7 +136,7 @@ int main(int argc, char *argv[]) {
 
     sleep(2);
     sem_unlink(MEM_READY_SEM);
-    unlinkMemory(mem);
+    //unlinkMemory(mem);
     for(int i=0;i<slavesNum;i++){
         close(pipes[i].slave_a_master[1]);
         close(pipes[i].master_a_slave[0]);
