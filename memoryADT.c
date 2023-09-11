@@ -129,7 +129,6 @@ void _unlinkMem(char* id) {
 }
 
 void _randomID(char* buffer) {
-    srand(time(NULL));
     char charSet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
     int setSize = strlen(charSet);
 

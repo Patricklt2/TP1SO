@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <semaphore.h>
+#include <time.h>
 #include "memoryADT.h"
 #include "queuefile.h"
 #include "publicInfo.h"
@@ -27,7 +28,7 @@ int calculateSlavesNum(int fAmount);
 
 //TODO agregar una funcion de exit global
 int main(int argc, char *argv[]) {
-
+    srand(time(NULL));
     if(argc<2)
         exit(1);
     sem_t* vistaSem;

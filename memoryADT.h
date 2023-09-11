@@ -8,6 +8,7 @@ typedef struct memoryCDT* memoryADT;
 
 /**
  * creates a new shared memory address
+ * srand() should be called before executing this command
  * @return ADT
  */
 memoryADT createSharedMem();
