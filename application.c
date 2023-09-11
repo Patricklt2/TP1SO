@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
     while(i < argc){
         //dequeue(q,buff);
         sem_wait(memwriteSem);
-        write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],argv[i]);
+        write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],strlen(argv[i]));
         sem_post(memreadSem);
         ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
         if(len<0){printf("error en read\n");exit(1);}
@@ -113,9 +113,6 @@ int main(int argc, char *argv[]) {
     }
 
     fclose(fp);
-
-    strcpy(mapPtr, str2);
-    sem_post(vistaSem);
 
     //decides how many slave processes need to be created and initializes them
 
