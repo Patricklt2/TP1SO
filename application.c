@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include "memoryADT.h"
 #include "queuefile.h"
+#include "publicInfo.h"
 
 #define SLAVENUM 5
 #define FILES_PER_SLAVENUM 20
@@ -28,6 +29,13 @@ int main(int argc, char *argv[]) {
     if(argc<2)
         exit(1);
     sem_t* vistaSem;
+
+    sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT | O_EXCL, S_IRUSR|S_IWUSR, 0);
+
+    if (memReadySem == SEM_FAILED) {
+        perror("sem_open");
+        exit(EXIT_FAILURE);
+    }
 
     Fqueue q = newQueue();
 
@@ -54,13 +62,16 @@ int main(int argc, char *argv[]) {
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
     }
+
     memoryADT mem = createSharedMem();
-    fputs(getMemoryID(mem), stdout);
+    write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
+    sem_post(memReadySem);
 
     //prints on stdout the information necessary for the vista process to connect
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
+
     char buff[100];
     char buffWrite[100];
     int i=0;
@@ -74,14 +85,12 @@ int main(int argc, char *argv[]) {
         printf("PID: %s",buffWrite);
         i++;
     }
-    free(q);
-
 
 
     //TODO sacar esto, sirve de ejemplo para mostrar como se puede escribir y leer en memoria compartida
     //de paso ver como hacer para que
-    char* str1 = "Hello Barbie\n";
-    char* str2 = "Hello Ken\n";
+    char* str1 = "Hey Barbie\n";
+    char* str2 = "Hey Ken\n";
 
     strcpy(mapPtr, str1);
     sem_post(vistaSem);
@@ -100,12 +109,11 @@ int main(int argc, char *argv[]) {
     //once all the slaves finish, writes to the result file and returns
 
     setFlag(mem, 1);
-    for(int i=0;i<slavesNum;i++){
-        close(pipes[i].master_a_slave[1]);
-        close(pipes[i].slave_a_master[0]);
-        kill(pipes[i].pid,1);
-    }
 
+    sleep(2);
+    sem_unlink(MEM_READY_SEM);
+    unlinkMemory(mem);
+    free(pipes);
 }
 
 

@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include "memoryADT.h"
+#include "publicInfo.h"
 
 #define BUFFER_SIZE 128
 
@@ -22,16 +23,28 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    sleep(1);
+
+    sem_t* memReadySem = sem_open(MEM_READY_SEM, 0);
+
+    if(memReadySem == SEM_FAILED){
+        perror("the vista process couldn't connect to the application process' public semaphore\n");
+    }
+
+    sem_wait(memReadySem);
+
     memoryADT sharedMem = openExistingMemory(appOutput);
 
     writeOutput(sharedMem);
 
+    sem_unlink(MEM_READY_SEM);
+    unlinkMemory(sharedMem);
     return 0;
 }
 
 int connectToApp(char* buffer, int argc, char* argv[]) {
-    if (argc < 2 && !isatty(fileno(stdin))) {
-        fgets(buffer, BUFFER_SIZE, stdin);
+    if (argc < 2 && !isatty(STDIN_FILENO)) {
+        read(STDIN_FILENO, buffer, BUFFER_SIZE);
         return 0;
     }
     else if(getMemoryAddress(argv[1], buffer) != -1) {
@@ -50,7 +63,8 @@ void writeOutput(memoryADT mem) {
 
     while(1) {
         if(getFlag(mem) == 1) {
-
+            //this is not for busy waiting, but instead to prevent the vista process from
+            //waiting on an unlinked semaphore
             if(sem_getvalue(appSem, &semValue) == -1) {
                 perror("sem_getvalue");
                 exit(EXIT_FAILURE);
@@ -91,7 +105,7 @@ int getMemoryAddress(char* pName, char* buffer) {
             appPid);
 
     FILE *input = popen(command, "r");
-    fgets(buffer, BUFFER_SIZE, input);
+    read(fileno(input), buffer, BUFFER_SIZE);
     pclose(input);
     pclose(fp);
     return 0;

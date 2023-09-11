@@ -1,2 +1,50 @@
-make all clean
-./application.out | ./vista.out
+# Ignore system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Ignore build output directories
+node_modules/
+build/
+dist/
+out/
+bin/
+__pycache__/
+*.egg-info/
+*.egg/
+*.pyc
+
+# Ignore environment-specific files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore log and temporary files
+*.log
+*.swp
+*.swo
+*.tmp
+*.bak
+*.cache
+
+# Ignore package-lock.json for npm and yarn
+package-lock.json
+yarn.lock
+
+# Ignore dependency directories
+/bower_components/
+/jspm_packages/
+
+# Ignore compiled files
+*.min.js
+*.min.css
+
+# Ignore specific files
+example_config.conf
+secrets.json
+run.sh
+.viminfo
+.bash_history
