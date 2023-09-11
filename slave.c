@@ -16,7 +16,9 @@ int auxMd5(char * fpath, char * extBuff){
     // comando para calcular el md5
     char *command = malloc(sizeof(char)*100);
     strcpy(command,"md5sum ");
+    strcat(command, "\"");
     strncat(command, fpath, strlen(fpath));
+    strcat(command, "\"");
 
     // Abrir pipe para captar el call
     FILE *fp = popen(command, "r");
