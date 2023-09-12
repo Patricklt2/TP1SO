@@ -27,7 +27,7 @@ typedef struct pipechannles{
 
 int calculateSlavesNum(int fAmount);
 
-int createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
+void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
 
 //TODO agregar una funcion de exit global
 int main(int argc, char *argv[]) {
@@ -113,7 +113,7 @@ int calculateSlavesNum(int fAmount) {
     return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);
 }
 
-int createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
+void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
     char * argv[] ={"./slave.out",NULL,NULL};
 
     close(fd_ms1);
@@ -123,6 +123,8 @@ int createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
     close(STDIN_FILENO);
     dup(fd_in);
     execve("./slave.out",argv,NULL);
+
+    return;
 }
 
 
