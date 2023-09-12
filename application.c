@@ -26,7 +26,8 @@ typedef struct pipechannles{
 }pipechannels;
 
 int calculateSlavesNum(int fAmount);
-void closePipes(pipechannels pipes, int slavesNum);
+void closePipes(pipechannels* pipes, int slavesNum);
+int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem);
 
 
 //TODO agregar una funcion de exit global
@@ -82,18 +83,7 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
-    char buffWrite[256];
-    int i=1;
-    while(i < argc){
-        write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],strlen(argv[i]));
-        ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
-        if(len<0){printf("error en read\n");exit(1);}
-        buffWrite[len]='\0';
-        strcpy(mapPtr, buffWrite);
-        mapPtr += strlen(buffWrite) + 1;
-        sem_post(vistaSem);
-        i++;
-    }
+    processFiles(pipes, slavesNum, mapPtr, argc, argv, vistaSem);
 
     setFlag(mem, 1);
 
@@ -102,11 +92,29 @@ int main(int argc, char *argv[]) {
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
     closePipes(pipes, slavesNum);
-    fclose(fp);
     exit(0);
 }
 
-void closePipes(pipechannels pipes, int slavesNum) {
+int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem) {
+    char buffWrite[256];
+    int i=1;
+
+    while(i < numFiles){
+        write(pipes[(i-1)%slavesNum].master_a_slave[1],files[i],strlen(files[i]));
+        ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
+
+        if(len<0) return 1;
+
+        buffWrite[len]='\0';
+        strcpy(ptr, buffWrite);
+        ptr += strlen(buffWrite) + 1;
+        sem_post(sem);
+        i++;
+    }
+    return 0;
+}
+
+void closePipes(pipechannels* pipes, int slavesNum) {
     for(int i=0;i<slavesNum;i++){
         close(pipes[i].slave_a_master[1]);
         close(pipes[i].master_a_slave[0]);
