@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int slavesNum =5;//ver bien de como calcular la cant de slaves
+    int slavesNum = calculateSlavesNum(argc);
     pipechannels pipes[slavesNum];
 
     for(int i=0;i<slavesNum;i++){
@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
             close(pipes[i].slave_a_master[1]);
     }
 
+
     memoryADT mem = createSharedMem();
     if(mem == NULL) {
         perror("failed to create shared memory");
@@ -81,14 +82,12 @@ int main(int argc, char *argv[]) {
     }
 
     write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
-    sem_post(memReadySem);
-
-    //prints on stdout the information necessary for the vista process to connect
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
-    char* mapPtr = memMap;
+    sem_post(memReadySem);
 
-    if(processFiles(pipes, slavesNum, mapPtr, argc, argv, vistaSem) == -1) {
+
+    if(processFiles(pipes, slavesNum, memMap, argc, argv, vistaSem) == -1) {
         cleanUp(mem, pipes, slavesNum, memReadySem);
         perror("an error occurred when processing files");
         return 1;
@@ -144,7 +143,7 @@ void closePipes(pipechannels* pipes, int slavesNum) {
 }
 
 int calculateSlavesNum(int fAmount) {
-    return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);
+    return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM + 1) + 1) * SLAVENUM);
 }
 
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
