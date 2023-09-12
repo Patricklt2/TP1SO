@@ -17,10 +17,6 @@
 #include <sys/select.h>
 #include <signal.h>
 
-#define SLAVENUM 2
-#define FILES_PER_SLAVENUM 20
-#define MAXFILESPERSLAVE 2
-
 typedef struct pipechannles{
     int pid;
     int slave_a_master[2];
@@ -142,8 +138,42 @@ void closePipes(pipechannels* pipes, int slavesNum) {
     }
 }
 
+double log10(double x) {
+    if (x <= 0.0) {
+        return -1.0; // log10 of a non-positive number is undefined
+    }
+
+    double result = 0.0;
+    while (x >= 10.0) {
+        x /= 10.0;
+        result += 1.0;
+    }
+
+    double fractional = 0.5;
+    for (int i = 0; i < 15; i++) {
+        fractional /= 10.0;
+        if (x >= 10.0) {
+            while (x >= 10.0) {
+                x /= 10.0;
+                result += fractional;
+            }
+        }
+    }
+
+    return result;
+}
+
+double ceil(double x) {
+    int intPart = (int)x;
+    if (x > intPart) {
+        return intPart + 1.0;
+    } else {
+        return x;
+    }
+}
+
 int calculateSlavesNum(int fAmount) {
-    return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM + 1) + 1) * SLAVENUM);
+    return (int)ceil(log10(fAmount))+1;
 }
 
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
@@ -163,6 +193,8 @@ void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
 
     return;
 }
+
+
 
 
 
