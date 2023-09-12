@@ -15,7 +15,6 @@
 #include "publicInfo.h"
 #include <fcntl.h>
 #include <sys/select.h>
-#include <sys/wait.h>
 #include <signal.h>
 
 #define SLAVENUM 2
@@ -58,6 +57,14 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         if ((pipes[i].pid = fork()) == 0) {
+            if(i > 0){
+                int j = i - 1;
+                while(j >= 0) {
+                    close(pipes[j].master_a_slave[1]);
+                    close(pipes[j].slave_a_master[0]);
+                    --j;
+                }
+            }
             createSlave(pipes[i].master_a_slave[1],pipes[i].slave_a_master[0],pipes[i].slave_a_master[1],pipes[i].master_a_slave[0]);
          }
             close(pipes[i].master_a_slave[0]);
@@ -149,6 +156,10 @@ void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
     dup(fd_out);
     close(STDIN_FILENO);
     dup(fd_in);
+
+    //Cerrar los pipes originales pues ahora estan en STDIN y STDOUT con fd 0 y 1
+    close(fd_out);
+    close(fd_in);
     execve("./slave.out",argv,NULL);
 
     return;
