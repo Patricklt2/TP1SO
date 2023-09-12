@@ -9,8 +9,11 @@
 #include <string.h>
 #include <semaphore.h>
 #include <time.h>
+#include <sys/time.h>
 #include "memoryADT.h"
 #include "publicInfo.h"
+#include <fcntl.h>
+#include <sys/select.h>
 
 #define SLAVENUM 2
 #define FILES_PER_SLAVENUM 20
@@ -37,19 +40,12 @@ int main(int argc, char *argv[]) {
 
     sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
 
-    memoryADT readmem=createSharedMem();
-    char* memreadId=getMemoryID(readmem);
-    sem_t* memreadSem=getMemorySem(readmem);
-    memoryADT writemem=createSharedMem();
-    sem_t* memwriteSem=getMemorySem(writemem);
-    char* memwriteId=getMemoryID(writemem);
-
-    char* argvs[]={memreadId,memwriteId,NULL};
-
     if (memReadySem == SEM_FAILED) {
         perror("sem_open");
         exit(EXIT_FAILURE);
     }
+
+
 
     int slavesNum =5;//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
@@ -65,7 +61,7 @@ int main(int argc, char *argv[]) {
             dup(pipes[i].slave_a_master[1]);
             close(STDIN_FILENO);
             dup(pipes[i].master_a_slave[0]);
-            execve("./slave.out",argvs,NULL);
+            execve("./slave.out",NULL,NULL);
          }
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
@@ -86,20 +82,76 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
-    char buffWrite[100];
+
+    //Sincronizar Padre e Hijos -- Los hijos van a usar semaforos internamente
+    fd_set read_fds, write_fds;
+    int max_fd_read = -1;
+    int max_fd_write = -1;
+
+    for (int i = 0; i < slavesNum; i++) {
+        if (pipes[i].slave_a_master[0] > max_fd_read) {
+            max_fd_read = pipes[i].slave_a_master[0];
+        }
+        if (pipes[i].master_a_slave[1] > max_fd_write) {
+            max_fd_write = pipes[i].master_a_slave[1];
+        }
+    }
+
+
+    char buffWrite[128];
     int i=1;
     while(i < argc){
-        sem_wait(memwriteSem);
-        write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],strlen(argv[i]));
-        sem_post(memreadSem);
-        ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
-        if(len<0){printf("error en read\n");exit(1);}
-        buffWrite[len]='\0';
-        fprintf(fp,"%s\n",buffWrite);
-        strcpy(mapPtr, buffWrite);
-        sem_post(vistaSem);
-        mapPtr += strlen(buffWrite) + 1;
-        i++;
+
+        //Se limpian cada iteracion
+        FD_ZERO(&read_fds);
+        FD_ZERO(&write_fds);
+
+        // Se agregan cada iteracion
+        for (int j = 0; j < slavesNum; j++) {
+            FD_SET(pipes[j].slave_a_master[0], &read_fds);
+        }
+
+        for (int j = 0; j < slavesNum; j++) {
+            FD_SET(pipes[j].master_a_slave[1], &write_fds);
+        }
+
+        // Verifico si hay algun pipe listo para ser escrito
+        int wReady_fds = select(max_fd_write + 1, NULL, &write_fds, NULL, NULL);
+
+        if (wReady_fds == -1) {
+            perror("select");
+            exit(1);
+        }
+
+        for (int j = 0; j < slavesNum; j++) {
+            if (FD_ISSET(pipes[j].master_a_slave[1], &write_fds) && i < argc) {
+                write(pipes[j].master_a_slave[1], argv[i], strlen(argv[i]));
+                i++;
+            }
+        }
+
+        usleep(10000);
+
+        int rReady_fds = select(max_fd_read + 1, &read_fds, NULL, NULL, NULL);
+
+        if (rReady_fds == -1) {
+            perror("select");
+            exit(1);
+        }
+
+        for (int j = 0; j < slavesNum; j++) {
+            if (FD_ISSET(pipes[j].slave_a_master[0], &read_fds)) {
+                // Read data from the selected pipe.
+                ssize_t len = read(pipes[j].slave_a_master[0], buffWrite, sizeof(buffWrite));
+                if(len<0){printf("error en read\n");exit(1);}
+                buffWrite[len] = '\0';
+                fprintf(fp, "%s\n", buffWrite);
+                // Notify Vista process or perform other actions as needed
+                strcpy(mapPtr, buffWrite);
+                sem_post(vistaSem);
+                mapPtr += strlen(buffWrite) + 1;
+            }
+        }
     }
 
     fclose(fp);
@@ -117,8 +169,7 @@ int main(int argc, char *argv[]) {
     sleep(2);
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
-    unlinkMemory(readmem);
-    unlinkMemory(writemem);
+
     for(int i=0;i<slavesNum;i++){
         close(pipes[i].slave_a_master[1]);
         close(pipes[i].master_a_slave[0]);

@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -std=c99 -D_XOPEN_SOURCE=500 -lpthread -pedantic -g
 LDFLAGS =
 
 # Source files for the application target
-APPLICATION_SOURCES = application.c memoryADT.c queuefile.c
+APPLICATION_SOURCES = application.c memoryADT.c
 APPLICATION_OBJECTS = $(APPLICATION_SOURCES:.c=.o)
 APPLICATION_EXECUTABLE = application.out
 
