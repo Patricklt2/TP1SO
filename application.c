@@ -1,3 +1,4 @@
+#define _POSIX_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -14,6 +15,8 @@
 #include "publicInfo.h"
 #include <fcntl.h>
 #include <sys/select.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #define SLAVENUM 2
 #define FILES_PER_SLAVENUM 20
@@ -29,7 +32,7 @@ int calculateSlavesNum(int fAmount);
 void closePipes(pipechannels* pipes, int slavesNum);
 int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem);
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
-void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum);
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, sem_t* memReadySem);
 
 int main(int argc, char *argv[]) {
 
@@ -64,6 +67,7 @@ int main(int argc, char *argv[]) {
     memoryADT mem = createSharedMem();
     if(mem == NULL) {
         perror("failed to create shared memory");
+        sem_close(memReadySem);
         sem_unlink(MEM_READY_SEM);
         closePipes(pipes, slavesNum);
         return 1;
@@ -78,19 +82,20 @@ int main(int argc, char *argv[]) {
     char* mapPtr = memMap;
 
     if(processFiles(pipes, slavesNum, mapPtr, argc, argv, vistaSem) == -1) {
-        cleanUp(mem, pipes, slavesNum);
+        cleanUp(mem, pipes, slavesNum, memReadySem);
         perror("an error occurred when processing files");
         return 1;
     }
 
-    cleanUp(mem, pipes, slavesNum);
+    cleanUp(mem, pipes, slavesNum, memReadySem);
     return 0;
 }
 
 
-void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum) {
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, sem_t* memReadySem) {
     setFlag(mem, 1);
     sleep(2);
+    sem_close(memReadySem);
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
     closePipes(pipes, slavesNum);

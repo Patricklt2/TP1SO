@@ -112,6 +112,7 @@ int _trunMem(int fd) {
     if(ftruncate(fd, sizeof(memoryCDT)) == -1) {
         return -1;
     }
+    return 0;
 }
 memoryADT _mapMem(int fd) {
     memoryADT aux = mmap(NULL, sizeof(memoryCDT), PROT_WRITE, MAP_SHARED, fd, 0);

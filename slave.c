@@ -41,19 +41,19 @@ int auxMd5(char * fpath, char * extBuff){
 }
 
 int main(){
-    char bufferWrite[256];  //Write to parent
+    char bufferWrite[200];  //Write to parent
     char bufferRead[256];   //Read from parent
     char aux[256];
 
     while(TRUE){
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
 
-        if(bytes_r<0){printf("reoto todo\n");exit(1);}
+        if(bytes_r<0){printf("roto todo\n");exit(1);}
 
         bufferRead[bytes_r] = '\0';
         auxMd5(bufferRead,bufferWrite);
 
-        sprintf(aux,"PID: %d %s\n", getpid(), bufferWrite);
+        sprintf(aux,"PID: %d %s\n",getpid(), bufferWrite);
         write(STDOUT_FILENO,aux,strlen(aux));
     }
 
