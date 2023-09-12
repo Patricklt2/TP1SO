@@ -29,8 +29,8 @@ int calculateSlavesNum(int fAmount);
 void closePipes(pipechannels* pipes, int slavesNum);
 int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem);
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum);
 
-//TODO agregar una funcion de exit global
 int main(int argc, char *argv[]) {
 
     if(argc<2)
@@ -38,7 +38,6 @@ int main(int argc, char *argv[]) {
 
     srand(time(NULL));
     sem_t* vistaSem;
-
 
     sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
 
@@ -49,6 +48,7 @@ int main(int argc, char *argv[]) {
 
     int slavesNum =5;//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
+
     for(int i=0;i<slavesNum;i++){
         if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
             perror("pipe machine broke\n");
@@ -77,16 +77,33 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
-    processFiles(pipes, slavesNum, mapPtr, argc, argv, vistaSem);
+    if(processFiles(pipes, slavesNum, mapPtr, argc, argv, vistaSem) == -1) {
+        cleanUp(mem, pipes, slavesNum);
+        perror("an error occurred when processing files");
+        return 1;
+    }
 
+    cleanUp(mem, pipes, slavesNum);
+    return 0;
+}
+
+
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum) {
     setFlag(mem, 1);
-
     sleep(2);
-
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
     closePipes(pipes, slavesNum);
-    exit(0);
+}
+
+char* buffToMem(char* ptr, char* buff, sem_t* sem) {
+    while(*buff != '\0') {
+        *ptr = *buff;
+        buff++;
+        ptr++;
+    }
+    sem_post(sem);
+    return ++ptr;
 }
 
 int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem) {
@@ -97,12 +114,10 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
         write(pipes[(i-1)%slavesNum].master_a_slave[1],files[i],strlen(files[i]));
         ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
 
-        if(len<0) return 1;
+        if(len<0) return -1;
 
         buffWrite[len]='\0';
-        strcpy(ptr, buffWrite);
-        ptr += strlen(buffWrite) + 1;
-        sem_post(sem);
+        ptr = buffToMem(ptr, buffWrite, sem);
         i++;
     }
     return 0;
