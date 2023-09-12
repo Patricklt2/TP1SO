@@ -1,0 +1,34 @@
+PID: 515 13b6309c4034e54ba478b97492ba7caf Makefile
+
+PID: 516 dfc48b49ea23e31c76f3b6e8ac30e347 README.txt
+
+PID: 517 7e39caf9a4a7d2fa9b4fb706a2802cb8 application.c
+
+PID: 518 dc01df5f2d16b67c1f9fe9c9d0510803 application.o
+
+PID: 519 7893353aa3eff7877a80291730413cb2 application.out
+
+PID: 515 d41d8cd98f00b204e9800998ecf8427e archivo
+
+PID: 516 7cd4841880042edb52821f89d6fa723b memoryADT.c
+
+PID: 517 47f9baeea34eb4b47e4bb0675384abd6 memoryADT.h
+
+PID: 518 b58713065864bf06f25e4bfd3230032c memoryADT.o
+
+PID: 519 802d38c05c9666aa0cd7997910604e58 publicInfo.h
+
+PID: 515 6ebab357116ce5f14c1c39bd255c4d0c run.sh
+
+PID: 516 d406950e6edf664b21a53d1013bb1422 slave.c
+
+PID: 517 127d2869c7d904f0c1acf93177b74fb0 slave.o
+
+PID: 518 302ad9bed2681a59c53ec7338acf2c96 slave.out
+
+PID: 519 f7d24a69c8e0a866e2eac7ba7588782e vista.c
+
+PID: 515 3172bc7c4253e00e2ce38f3e499c2105 vista.o
+
+PID: 516 8a48f0091a0f2e1d554f3661bfbf83b9 vista.out
+

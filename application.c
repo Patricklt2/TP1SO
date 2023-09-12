@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
         perror("failed to create shared memory");
         exit(1);
     }
-
+    sleep(2);
     write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
     sem_post(memReadySem);
 
@@ -108,6 +108,7 @@ int main(int argc, char *argv[]) {
         fprintf(fp,"%s\n",buffWrite);
         strcpy(mapPtr, buffWrite);
         mapPtr += strlen(buffWrite) + 1;
+        sem_post(vistaSem);
         i++;
     }
 
@@ -123,7 +124,6 @@ int main(int argc, char *argv[]) {
 
     setFlag(mem, 1);
 
-    sleep(2);
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
 
