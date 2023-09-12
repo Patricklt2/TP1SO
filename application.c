@@ -101,57 +101,14 @@ int main(int argc, char *argv[]) {
     char buffWrite[128];
     int i=1;
     while(i < argc){
-
-        //Se limpian cada iteracion
-        FD_ZERO(&read_fds);
-        FD_ZERO(&write_fds);
-
-        // Se agregan cada iteracion
-        for (int j = 0; j < slavesNum; j++) {
-            FD_SET(pipes[j].slave_a_master[0], &read_fds);
-        }
-
-        for (int j = 0; j < slavesNum; j++) {
-            FD_SET(pipes[j].master_a_slave[1], &write_fds);
-        }
-
-        // Verifico si hay algun pipe listo para ser escrito
-        int wReady_fds = select(max_fd_write + 1, NULL, &write_fds, NULL, NULL);
-
-        if (wReady_fds == -1) {
-            perror("select");
-            exit(1);
-        }
-
-        for (int j = 0; j < slavesNum; j++) {
-            if (FD_ISSET(pipes[j].master_a_slave[1], &write_fds) && i < argc) {
-                write(pipes[j].master_a_slave[1], argv[i], strlen(argv[i]));
-                i++;
-            }
-        }
-
-
-        int rReady_fds = select(max_fd_read + 1, &read_fds, NULL, NULL, NULL);
-
-        if (rReady_fds == -1) {
-            perror("select");
-            exit(1);
-        }
-
-        for (int j = 0; j < slavesNum; j++) {
-            if (FD_ISSET(pipes[j].slave_a_master[0], &read_fds)) {
-                // Read data from the selected pipe.
-                ssize_t len = read(pipes[j].slave_a_master[0], buffWrite, sizeof(buffWrite));
-                if(len<0){printf("error en read\n");exit(1);}
-                buffWrite[len] = '\0';
-                fprintf(fp, "%s\n", buffWrite);
-                // Notify Vista process or perform other actions as needed
-                strcpy(mapPtr, buffWrite);
-                sem_post(vistaSem);
-                mapPtr += strlen(buffWrite) + 1;
-
-            }
-        }
+        write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],strlen(argv[i]));
+        ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
+        if(len<0){printf("error en read\n");exit(1);}
+        buffWrite[len]='\0';
+        fprintf(fp,"%s\n",buffWrite);
+        strcpy(mapPtr, buffWrite);
+        mapPtr += strlen(buffWrite) + 1;
+        i++;
     }
 
     fclose(fp);
@@ -175,6 +132,7 @@ int main(int argc, char *argv[]) {
         close(pipes[i].master_a_slave[0]);
         kill(pipes[i].pid,1);
     }
+    exit(0);
 }
 
 
