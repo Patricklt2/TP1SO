@@ -13,7 +13,7 @@
 
 int auxMd5(char * fpath, char * extBuff){
     // comando para calcular el md5
-    char *command = malloc(sizeof(char)*200);
+    char *command = malloc(sizeof(char)*300);
     strcpy(command,"md5sum ");
     strcat(command, "\"");   //Comillas habilitan que el md5 parsee bien files con " " espacios
     strcat(command, fpath);

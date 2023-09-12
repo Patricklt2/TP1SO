@@ -130,7 +130,6 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        usleep(10000);
 
         int rReady_fds = select(max_fd_read + 1, &read_fds, NULL, NULL, NULL);
 
@@ -150,6 +149,7 @@ int main(int argc, char *argv[]) {
                 strcpy(mapPtr, buffWrite);
                 sem_post(vistaSem);
                 mapPtr += strlen(buffWrite) + 1;
+
             }
         }
     }
