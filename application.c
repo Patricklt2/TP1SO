@@ -26,13 +26,16 @@ typedef struct pipechannles{
 }pipechannels;
 
 int calculateSlavesNum(int fAmount);
+void closePipes(pipechannels pipes, int slavesNum);
 
 
 //TODO agregar una funcion de exit global
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
+
     if(argc<2)
-        exit(1);
+        return 1;
+
+    srand(time(NULL));
     sem_t* vistaSem;
 
     FILE* fp;
@@ -41,8 +44,8 @@ int main(int argc, char *argv[]) {
     sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
 
     if (memReadySem == SEM_FAILED) {
-        perror("sem_open");
-        exit(EXIT_FAILURE);
+        perror("failed to create semaphore");
+        return 1;
     }
 
     int slavesNum =5;//ver bien de como calcular la cant de slaves
@@ -67,9 +70,10 @@ int main(int argc, char *argv[]) {
 
     memoryADT mem = createSharedMem();
     if(mem == NULL) {
-        //TODO salir de una manera mas prolija, que no deje al vista bloqueado
         perror("failed to create shared memory");
-        exit(1);
+        sem_unlink(MEM_READY_SEM);
+        closePipes(pipes, slavesNum);
+        return 1;
     }
 
     write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
@@ -110,30 +114,24 @@ int main(int argc, char *argv[]) {
         i++;
     }
 
-    fclose(fp);
-
-    //decides how many slave processes need to be created and initializes them
-
-    //waits until a slave process finishes, and writes the result on the buffer
-
-    //assigns a new file to the slave process, if there's none left, the slave is killed
-
-    //once all the slaves finish, writes to the result file and returns
-
     setFlag(mem, 1);
 
     sleep(2);
+
     sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
+    closePipes(pipes, slavesNum);
+    fclose(fp);
+    exit(0);
+}
 
+void closePipes(pipechannels pipes, int slavesNum) {
     for(int i=0;i<slavesNum;i++){
         close(pipes[i].slave_a_master[1]);
         close(pipes[i].master_a_slave[0]);
         kill(pipes[i].pid,1);
     }
-    exit(0);
 }
-
 
 int calculateSlavesNum(int fAmount) {
     return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);

@@ -43,6 +43,7 @@ int main(int argc, char* argv[]) {
     memoryADT sharedMem = openExistingMemory(appOutput);
     if(sharedMem == NULL) {
         perror("failed to open shared memory");
+        sem_unlink(MEM_READY_SEM);
         return 1;
     }
 
