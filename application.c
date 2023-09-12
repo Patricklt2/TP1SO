@@ -45,8 +45,6 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-
-
     int slavesNum =5;//ver bien de como calcular la cant de slaves
     pipechannels pipes[slavesNum];
     for(int i=0;i<slavesNum;i++){
