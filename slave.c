@@ -6,7 +6,6 @@
 #include <libgen.h>
 #include "semaphore.h"
 
-#define NUM_CHILD 20
 #define TRUE 1
 #define FALSE 0
 #define BYTES_MD5HASH 33 //32 para el hash + 1 para el  '\0'
@@ -42,9 +41,9 @@ int auxMd5(char * fpath, char * extBuff){
 }
 
 int main(){
-    char bufferWrite[200];  //Write to parent
-    char bufferRead[200];   //Read from parent
-    char aux[200];
+    char bufferWrite[256];  //Write to parent
+    char bufferRead[256];   //Read from parent
+    char aux[256];
 
     while(TRUE){
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));

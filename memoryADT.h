@@ -2,7 +2,7 @@
 #define TP1SO_MEMORYADT_H
 
 #include <semaphore.h>
-#define MEMORY_SIZE 1048576
+#define MEMORY_SIZE 10485760
 
 typedef struct memoryCDT* memoryADT;
 
