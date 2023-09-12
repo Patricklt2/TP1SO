@@ -38,8 +38,6 @@ int main(int argc, char *argv[]) {
     srand(time(NULL));
     sem_t* vistaSem;
 
-    FILE* fp;
-    if(fp=fopen("archivo", "w"));
 
     sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
 
@@ -84,30 +82,13 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
     char* mapPtr = memMap;
 
-
-    //Sincronizar Padre e Hijos -- Los hijos van a usar semaforos internamente
-    fd_set read_fds, write_fds;
-    int max_fd_read = -1;
-    int max_fd_write = -1;
-
-    for (int i = 0; i < slavesNum; i++) {
-        if (pipes[i].slave_a_master[0] > max_fd_read) {
-            max_fd_read = pipes[i].slave_a_master[0];
-        }
-        if (pipes[i].master_a_slave[1] > max_fd_write) {
-            max_fd_write = pipes[i].master_a_slave[1];
-        }
-    }
-
-
-    char buffWrite[128];
+    char buffWrite[256];
     int i=1;
     while(i < argc){
         write(pipes[(i-1)%slavesNum].master_a_slave[1],argv[i],strlen(argv[i]));
         ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
         if(len<0){printf("error en read\n");exit(1);}
         buffWrite[len]='\0';
-        fprintf(fp,"%s\n",buffWrite);
         strcpy(mapPtr, buffWrite);
         mapPtr += strlen(buffWrite) + 1;
         sem_post(vistaSem);
