@@ -1,3 +1,4 @@
+#define _POSIX_SOURCE
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -14,6 +15,8 @@
 #include "publicInfo.h"
 #include <fcntl.h>
 #include <sys/select.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 #define SLAVENUM 2
 #define FILES_PER_SLAVENUM 20
