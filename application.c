@@ -28,7 +28,7 @@ typedef struct pipechannles{
 int calculateSlavesNum(int fAmount);
 void closePipes(pipechannels* pipes, int slavesNum);
 int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem);
-
+void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
 
 //TODO agregar una funcion de exit global
 int main(int argc, char *argv[]) {
@@ -55,13 +55,7 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         if ((pipes[i].pid = fork()) == 0) {
-            close(pipes[i].master_a_slave[1]);
-            close(pipes[i].slave_a_master[0]);
-            close(STDOUT_FILENO);
-            dup(pipes[i].slave_a_master[1]);
-            close(STDIN_FILENO);
-            dup(pipes[i].master_a_slave[0]);
-            execve("./slave.out",NULL,NULL);
+            createSlave(pipes[i].master_a_slave[1],pipes[i].slave_a_master[0],pipes[i].slave_a_master[1],pipes[i].master_a_slave[0]);
          }
             close(pipes[i].master_a_slave[0]);
             close(pipes[i].slave_a_master[1]);
@@ -124,6 +118,20 @@ void closePipes(pipechannels* pipes, int slavesNum) {
 
 int calculateSlavesNum(int fAmount) {
     return (fAmount < SLAVENUM) ? (fAmount) : (((fAmount / FILES_PER_SLAVENUM) + 1) * SLAVENUM);
+}
+
+void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
+    char * argv[] ={"./slave.out",NULL,NULL};
+
+    close(fd_ms1);
+    close(fd_sm0);
+    close(STDOUT_FILENO);
+    dup(fd_out);
+    close(STDIN_FILENO);
+    dup(fd_in);
+    execve("./slave.out",argv,NULL);
+
+    return;
 }
 
 
