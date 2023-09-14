@@ -16,7 +16,7 @@ int auxMd5(char * fpath, char * extBuff){
     strcpy(command,"md5sum ");
     strcat(command, "\"");   //Comillas habilitan que el md5 parsee bien files con " " espacios
     strcat(command, fpath);
-    strcat(command, "\"");
+    strcat(command, "\" 2>/dev/null"); // Redirijo mensaje de error del md5sum para suprimir
 
     // Abrir pipe para captar el call
     FILE *fp = popen(command, "r");
