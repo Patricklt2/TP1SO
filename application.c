@@ -115,18 +115,75 @@ char* buffToMem(char* ptr, char* buff, sem_t* sem) {
 
 int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem) {
     char buffWrite[256];
-    int i=1;
+    int i=1;                  //Contador de archivos pasados
+    int processed_files = 0;  //Contador de los archivos actualmente procesados
 
-    while(i < numFiles){
-        write(pipes[(i-1)%slavesNum].master_a_slave[1],files[i],strlen(files[i]));
-        ssize_t len=read(pipes[(i-1)%slavesNum].slave_a_master[0],buffWrite,sizeof(buffWrite));
+    fd_set read_fds;
+    int max_fd = -1;
 
-        if(len<0) return -1;
-
-        buffWrite[len]='\0';
-        ptr = buffToMem(ptr, buffWrite, sem);
-        i++;
+    //Arranco el ciclo
+    if(slavesNum < numFiles) {
+        while(i < slavesNum){
+                write(pipes[i-1].master_a_slave[1], files[i], strlen(files[i]));
+                i++;
+        }
     }
+
+    //Ciclo principal
+    while (i < numFiles) {
+        // Set de fd
+        FD_ZERO(&read_fds);
+
+        for (int j = 0; j < slavesNum; j++) {
+            FD_SET(pipes[j].slave_a_master[0], &read_fds);
+            max_fd = (pipes[j].slave_a_master[0] > max_fd) ? pipes[j].slave_a_master[0] : max_fd;
+        }
+
+        int select_result = select(max_fd + 1, &read_fds, NULL, NULL, NULL);
+
+        if (select_result < 0) {
+            perror("select");
+            return -1;
+        } else if (select_result == 0) {
+            // No hay nada listo, sigo
+            continue;
+        } else {
+
+            for (int j = 0; j < slavesNum && i < numFiles; j++) {
+                if (FD_ISSET(pipes[j].slave_a_master[0], &read_fds)) {
+                    ssize_t len = read(pipes[j].slave_a_master[0], buffWrite, sizeof(buffWrite));
+
+                    if (len < 0) {
+                        perror("read");
+                        return -1;
+                    }
+
+                    buffWrite[len] = '\0';
+                    ptr = buffToMem(ptr, buffWrite, sem);
+                    write(pipes[j].master_a_slave[1], files[i], strlen(files[i]));
+                    i++;
+                    processed_files++;
+                }
+            }
+        }
+    }
+
+    //Si quedo algun archivo pendiente, lo levanto
+    i = 0;
+    while(processed_files < numFiles-1) {
+            ssize_t len = read(pipes[i].slave_a_master[0], buffWrite, sizeof(buffWrite));
+
+            if (len < 0) {
+                perror("read");
+                return -1;
+            }
+
+            buffWrite[len] = '\0';
+            ptr = buffToMem(ptr, buffWrite, sem);
+            processed_files++;
+            i++;
+    }
+
     return 0;
 }
 
