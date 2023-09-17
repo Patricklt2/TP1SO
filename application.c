@@ -16,10 +16,10 @@
 #include <sys/select.h>
 #include <signal.h>
 
-typedef struct pipechannles{
+typedef struct pipechannels{
     int pid;
-    int slave_a_master[2];
-    int master_a_slave[2];
+    int slave_to_master[2];
+    int master_to_slave[2];
 }pipechannels;
 
 int calculateSlavesNum(int fAmount);
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     pipechannels pipes[slavesNum];
 
     for(int i=0;i<slavesNum;i++){
-        if(pipe(pipes[i].master_a_slave)==-1||pipe(pipes[i].slave_a_master)==-1){
+        if(pipe(pipes[i].master_to_slave)==-1||pipe(pipes[i].slave_to_master)==-1){
             perror("pipe machine broke\n");
             exit(1);
         }
@@ -48,15 +48,15 @@ int main(int argc, char *argv[]) {
             if(i > 0){
                 int j = i - 1;
                 while(j >= 0) {
-                    close(pipes[j].master_a_slave[1]);
-                    close(pipes[j].slave_a_master[0]);
+                    close(pipes[j].master_to_slave[1]);
+                    close(pipes[j].slave_to_master[0]);
                     --j;
                 }
             }
-            createSlave(pipes[i].master_a_slave[1],pipes[i].slave_a_master[0],pipes[i].slave_a_master[1],pipes[i].master_a_slave[0]);
+            createSlave(pipes[i].master_to_slave[1],pipes[i].slave_to_master[0],pipes[i].slave_to_master[1],pipes[i].master_to_slave[0]);
          }
-            close(pipes[i].master_a_slave[0]);
-            close(pipes[i].slave_a_master[1]);
+            close(pipes[i].master_to_slave[0]);
+            close(pipes[i].slave_to_master[1]);
     }
 
 
@@ -67,7 +67,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    //escribe el ID de la shm para el proceso vista
     write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
+
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
 
@@ -111,7 +113,7 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
     //Arranco el ciclo
     if(slavesNum <= numFiles) {
         while(i-1 < slavesNum){
-                write(pipes[i-1].master_a_slave[1], files[i], strlen(files[i]));
+                write(pipes[i-1].master_to_slave[1], files[i], strlen(files[i]));
                 i++;
         }
     }
@@ -122,8 +124,8 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
         FD_ZERO(&read_fds);
 
         for (int j = 0; j < slavesNum; j++) {
-            FD_SET(pipes[j].slave_a_master[0], &read_fds);
-            max_fd = (pipes[j].slave_a_master[0] > max_fd) ? pipes[j].slave_a_master[0] : max_fd;
+            FD_SET(pipes[j].slave_to_master[0], &read_fds);
+            max_fd = (pipes[j].slave_to_master[0] > max_fd) ? pipes[j].slave_to_master[0] : max_fd;
         }
 
         int select_result = select(max_fd + 1, &read_fds, NULL, NULL, NULL);
@@ -137,8 +139,8 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
         } else {
 
             for (int j = 0; j < slavesNum && i < numFiles; j++) {
-                if (FD_ISSET(pipes[j].slave_a_master[0], &read_fds)) {
-                    ssize_t len = read(pipes[j].slave_a_master[0], buffWrite, sizeof(buffWrite));
+                if (FD_ISSET(pipes[j].slave_to_master[0], &read_fds)) {
+                    ssize_t len = read(pipes[j].slave_to_master[0], buffWrite, sizeof(buffWrite));
 
                     if (len < 0) {
                         perror("read");
@@ -147,7 +149,7 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
 
                     buffWrite[len] = '\0';
                     ptr = buffToMem(ptr, buffWrite, sem);
-                    write(pipes[j].master_a_slave[1], files[i], strlen(files[i]));
+                    write(pipes[j].master_to_slave[1], files[i], strlen(files[i]));
                     i++;
                     processed_files++;
                 }
@@ -158,7 +160,7 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
     //Si quedo algun archivo pendiente, lo levanto
     i = 0;
     while(processed_files < numFiles-1) {
-            ssize_t len = read(pipes[i].slave_a_master[0], buffWrite, sizeof(buffWrite));
+            ssize_t len = read(pipes[i].slave_to_master[0], buffWrite, sizeof(buffWrite));
 
             if (len < 0) {
                 perror("read");
@@ -178,8 +180,8 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
 
 void closePipes(pipechannels* pipes, int slavesNum) {
     for(int i=0;i<slavesNum;i++){
-        close(pipes[i].slave_a_master[1]);
-        close(pipes[i].master_a_slave[0]);
+        close(pipes[i].slave_to_master[1]);
+        close(pipes[i].master_to_slave[0]);
         kill(pipes[i].pid,1);
     }
 }
@@ -239,8 +241,3 @@ void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
 
     return;
 }
-
-
-
-
-
