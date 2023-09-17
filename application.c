@@ -12,7 +12,6 @@
 #include <time.h>
 #include <sys/time.h>
 #include "memoryADT.h"
-#include "publicInfo.h"
 #include <fcntl.h>
 #include <sys/select.h>
 #include <signal.h>
@@ -27,7 +26,7 @@ int calculateSlavesNum(int fAmount);
 void closePipes(pipechannels* pipes, int slavesNum);
 int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem);
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
-void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, sem_t* memReadySem);
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum);
 
 int main(int argc, char *argv[]) {
 
@@ -36,13 +35,6 @@ int main(int argc, char *argv[]) {
 
     srand(time(NULL));
     sem_t* vistaSem;
-
-    sem_t* memReadySem = sem_open(MEM_READY_SEM, O_CREAT, S_IRUSR|S_IWUSR, 0);
-
-    if (memReadySem == SEM_FAILED) {
-        perror("failed to create semaphore");
-        return 1;
-    }
 
     int slavesNum = calculateSlavesNum(argc);
     pipechannels pipes[slavesNum];
@@ -71,8 +63,6 @@ int main(int argc, char *argv[]) {
     memoryADT mem = createSharedMem();
     if(mem == NULL) {
         perror("failed to create shared memory");
-        sem_close(memReadySem);
-        sem_unlink(MEM_READY_SEM);
         closePipes(pipes, slavesNum);
         return 1;
     }
@@ -80,25 +70,22 @@ int main(int argc, char *argv[]) {
     write(STDOUT_FILENO, getMemoryID(mem), strlen(getMemoryID(mem)));
     char* memMap = getMemoryMap(mem);
     vistaSem = getMemorySem(mem);
-    sem_post(memReadySem);
 
 
     if(processFiles(pipes, slavesNum, memMap, argc, argv, vistaSem) == -1) {
-        cleanUp(mem, pipes, slavesNum, memReadySem);
+        cleanUp(mem, pipes, slavesNum);
         perror("an error occurred when processing files");
         return 1;
     }
 
-    cleanUp(mem, pipes, slavesNum, memReadySem);
+    cleanUp(mem, pipes, slavesNum);
     return 0;
 }
 
 
-void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, sem_t* memReadySem) {
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum) {
     setFlag(mem, 1);
     sleep(2);
-    sem_close(memReadySem);
-    sem_unlink(MEM_READY_SEM);
     unlinkMemory(mem);
     closePipes(pipes, slavesNum);
 }

@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include "memoryADT.h"
-#include "publicInfo.h"
 
 #define BUFFER_SIZE 128
 
@@ -30,25 +29,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    sleep(1);
-
-    sem_t* memReadySem = sem_open(MEM_READY_SEM, 0);
-
-    if(memReadySem == SEM_FAILED){
-        perror("the vista process couldn't connect to the application process' public semaphore\n");
-        return 1;
-    }
-
-    sem_wait(memReadySem);
     memoryADT sharedMem = openExistingMemory(appOutput);
     if(sharedMem == NULL) {
         perror("failed to open shared memory");
-        sem_unlink(MEM_READY_SEM);
         return 1;
     }
 
     writeOutput(sharedMem);
-    sem_unlink(MEM_READY_SEM);
     unlinkMemory(sharedMem);
     return 0;
 }
