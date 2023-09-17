@@ -28,9 +28,9 @@ typedef struct pipechannels{
 
 int calculateSlavesNum(int fAmount);
 void closePipes(pipechannels* pipes, int slavesNum);
-int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem);
+int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem, FILE * result);
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
-void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum);
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, FILE * result);
 
 int main(int argc, char *argv[]) {
     if(argc<2)
@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
 
     int slavesNum = calculateSlavesNum(argc);
     pipechannels pipes[slavesNum];
+
+    FILE * resultado = fopen("resultado", "w");
 
     for(int i=0;i<slavesNum;i++){
         if(pipe(pipes[i].master_to_slave)==-1||pipe(pipes[i].slave_to_master)==-1){
@@ -75,22 +77,23 @@ int main(int argc, char *argv[]) {
     vistaSem = getMemorySem(mem);
 
 
-    if(processFiles(pipes, slavesNum, memMap, argc, argv, vistaSem) == -1) {
-        cleanUp(mem, pipes, slavesNum);
+    if(processFiles(pipes, slavesNum, memMap, argc, argv, vistaSem, resultado) == -1) {
+        cleanUp(mem, pipes, slavesNum, resultado);
         perror("an error occurred when processing files");
         return 1;
     }
 
-    cleanUp(mem, pipes, slavesNum);
+    cleanUp(mem, pipes, slavesNum, resultado);
     return 0;
 }
 
 
-void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum) {
+void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, FILE* result) {
     setFlag(mem, 1);
     sleep(2);
     unlinkMemory(mem);
     closePipes(pipes, slavesNum);
+    fclose(result);
 }
 
 char* buffToMem(char* ptr, char* buff, sem_t* sem) {
@@ -103,7 +106,7 @@ char* buffToMem(char* ptr, char* buff, sem_t* sem) {
     return ++ptr;
 }
 
-int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem) {
+int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, char* files[], sem_t* sem, FILE * result) {
     char buffWrite[256];
     int i=1;                  //Contador de archivos pasados
     int processed_files = 0;  //Contador de los archivos actualmente procesados
@@ -150,6 +153,7 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
 
                     buffWrite[len] = '\0';
                     ptr = buffToMem(ptr, buffWrite, sem);
+                    fprintf(result,"%s",buffWrite);
                     write(pipes[j].master_to_slave[1], files[i], strlen(files[i]));
                     i++;
                     processed_files++;
@@ -171,6 +175,7 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
             if(len) {
                 buffWrite[len] = '\0';
                 ptr = buffToMem(ptr, buffWrite, sem);
+                fprintf(result,"%s",buffWrite);
                 processed_files++;
                 i++;
             }
