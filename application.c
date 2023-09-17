@@ -122,8 +122,8 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
     int max_fd = -1;
 
     //Arranco el ciclo
-    if(slavesNum < numFiles) {
-        while(i < slavesNum){
+    if(slavesNum <= numFiles) {
+        while(i-1 < slavesNum){
                 write(pipes[i-1].master_a_slave[1], files[i], strlen(files[i]));
                 i++;
         }
@@ -197,7 +197,7 @@ void closePipes(pipechannels* pipes, int slavesNum) {
 
 double log10(double x) {
     if (x <= 0.0) {
-        return -1.0; // log10 of a non-positive number is undefined
+        return -1.0;
     }
 
     double result = 0.0;
