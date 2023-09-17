@@ -165,10 +165,12 @@ int processFiles(pipechannels* pipes, int slavesNum, char* ptr, int numFiles, ch
                 return -1;
             }
 
-            buffWrite[len] = '\0';
-            ptr = buffToMem(ptr, buffWrite, sem);
-            processed_files++;
-            i++;
+            if(len) {
+                buffWrite[len] = '\0';
+                ptr = buffToMem(ptr, buffWrite, sem);
+                processed_files++;
+                i++;
+            }
     }
 
     return 0;
