@@ -45,14 +45,13 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         if ((pipes[i].pid = fork()) == 0) {
-            if(i > 0){
                 int j = i - 1;
                 while(j >= 0) {
                     close(pipes[j].master_a_slave[1]);
                     close(pipes[j].slave_a_master[0]);
                     --j;
                 }
-            }
+
             createSlave(pipes[i].master_a_slave[1],pipes[i].slave_a_master[0],pipes[i].slave_a_master[1],pipes[i].master_a_slave[0]);
          }
             close(pipes[i].master_a_slave[0]);
