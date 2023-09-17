@@ -16,6 +16,10 @@
 #include <sys/select.h>
 #include <signal.h>
 
+#define MAX_FILE_COUNT_LOGSCALE 1000
+#define EXP_VAL 2.71828
+#define CORE_THREAD 8
+
 typedef struct pipechannels{
     int pid;
     int slave_to_master[2];
@@ -29,7 +33,6 @@ void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
 void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum);
 
 int main(int argc, char *argv[]) {
-
     if(argc<2)
         return 1;
 
@@ -45,20 +48,18 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
         if ((pipes[i].pid = fork()) == 0) {
-            if(i > 0){
-                int j = i - 1;
-                while(j >= 0) {
-                    close(pipes[j].master_to_slave[1]);
-                    close(pipes[j].slave_to_master[0]);
-                    --j;
-                }
+            int j = i - 1;
+            while(j >= 0) {
+                close(pipes[j].master_to_slave[1]);
+                close(pipes[j].slave_to_master[0]);
+                --j;
             }
             createSlave(pipes[i].master_to_slave[1],pipes[i].slave_to_master[0],pipes[i].slave_to_master[1],pipes[i].master_to_slave[0]);
-         }
+            }
+
             close(pipes[i].master_to_slave[0]);
             close(pipes[i].slave_to_master[1]);
     }
-
 
     memoryADT mem = createSharedMem();
     if(mem == NULL) {
@@ -186,23 +187,23 @@ void closePipes(pipechannels* pipes, int slavesNum) {
     }
 }
 
-double log10(double x) {
+double logX(double logN,double x) {
     if (x <= 0.0) {
         return -1.0;
     }
 
     double result = 0.0;
-    while (x >= 10.0) {
-        x /= 10.0;
+    while (x >= logN) {
+        x /= logN;
         result += 1.0;
     }
 
     double fractional = 0.5;
     for (int i = 0; i < 15; i++) {
-        fractional /= 10.0;
-        if (x >= 10.0) {
-            while (x >= 10.0) {
-                x /= 10.0;
+        fractional /= logN;
+        if (x >= logN) {
+            while (x >= logN) {
+                x /= logN;
                 result += fractional;
             }
         }
@@ -221,7 +222,7 @@ double ceil(double x) {
 }
 
 int calculateSlavesNum(int fAmount) {
-    return (int)ceil(log10(fAmount))+1;
+    return fAmount < MAX_FILE_COUNT_LOGSCALE ? (int)ceil(logX(10,fAmount))+1 : ((CORE_THREAD < (int)ceil(logX(EXP_VAL,fAmount)) ? CORE_THREAD : (int)ceil(logX(EXP_VAL,fAmount))));
 }
 
 void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in){
