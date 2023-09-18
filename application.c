@@ -180,8 +180,8 @@ int processFiles(memoryADT mem, pipechannels* pipes, int slavesNum, char* ptr, i
     }
 
     strcpy(buffWrite, "files processed successfully\n");
-    buffToMem(ptr, buffWrite, sem);
     setFlag(mem, 1);
+    buffToMem(ptr, buffWrite, sem);
     return 0;
 }
 
