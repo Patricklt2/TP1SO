@@ -45,6 +45,8 @@ int main(){
     char bufferRead[256];   //Read from parent
     char aux[256];
 
+    int p = open("pipe", O_WRONLY);
+
     while(TRUE){
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
 
@@ -55,8 +57,10 @@ int main(){
 
         sprintf(aux,"PID: %d %s\n",getpid(), bufferWrite);
         write(STDOUT_FILENO,aux,strlen(aux));
+        write(p,aux,strlen(aux));
     }
 
+    close(p);
 
     exit(0);
 }
