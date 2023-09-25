@@ -48,7 +48,7 @@ int main(){
     char bufferRead[256];   //Read from parent
     char aux[256];
 
-    int p = open("pipe2", O_WRONLY);
+    int p = open("/tmp/myfifo", O_WRONLY);
 
     while(TRUE){
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
@@ -63,5 +63,6 @@ int main(){
         write(p,aux,strlen(aux));
     }
 
+    close(p);
     exit(0);
 }

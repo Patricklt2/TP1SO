@@ -34,8 +34,7 @@ void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, FILE * result);
 
 int main(int argc, char *argv[]) {
 
-    char* pipename="text";
-    if(mkfifo(pipename, 0666) == -1) {
+    if(mkfifo("/tmp/myfifo", 0666) == -1) {
         printf("no funciona\n");
     }
 
