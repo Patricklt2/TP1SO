@@ -33,6 +33,12 @@ void createSlave(int fd_ms1, int fd_sm0, int fd_out, int fd_in);
 void cleanUp(memoryADT mem, pipechannels* pipes, int slavesNum, FILE * result);
 
 int main(int argc, char *argv[]) {
+
+    char* pipename="text";
+    if(mkfifo(pipename, 0666) == -1) {
+        printf("no funciona\n");
+    }
+
     if(argc<2)
         return 1;
 
@@ -41,8 +47,6 @@ int main(int argc, char *argv[]) {
 
     int slavesNum = calculateSlavesNum(argc);
     pipechannels pipes[slavesNum];
-    char* pipename="pipe";
-    mkfifo(pipename,0666);
 
     FILE * resultado = fopen("resultado", "w");
 

@@ -5,6 +5,9 @@
 #include <sys/wait.h>
 #include <libgen.h>
 #include "semaphore.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -45,7 +48,7 @@ int main(){
     char bufferRead[256];   //Read from parent
     char aux[256];
 
-    int p = open("pipe", O_WRONLY);
+    int p = open("pipe2", O_WRONLY);
 
     while(TRUE){
         ssize_t bytes_r = read(STDIN_FILENO,bufferRead,sizeof(bufferRead));
@@ -59,8 +62,6 @@ int main(){
         write(STDOUT_FILENO,aux,strlen(aux));
         write(p,aux,strlen(aux));
     }
-
-    close(p);
 
     exit(0);
 }

@@ -8,7 +8,7 @@ APPLICATION_OBJECTS = $(APPLICATION_SOURCES:.c=.o)
 APPLICATION_EXECUTABLE = application.out
 
 # Source files for the vista target
-VISTA_SOURCES = vista.c memoryADT.c
+VISTA_SOURCES = vista2.c memoryADT.c
 VISTA_OBJECTS = $(VISTA_SOURCES:.c=.o)
 VISTA_EXECUTABLE = vista.out
 

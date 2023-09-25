@@ -9,7 +9,7 @@
 #include "memoryADT.h"
 
 #define BUFFER_SIZE 128
-#define NAMED_PIPE "pipe"
+#define NAMED_PIPE "text"
 
 void writeOutput(int pipe);
 int connectToPipe();
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     if(pipe == -1) {
         return 1;
     }
-    writeOutput(sharedMem);
+    writeOutput(pipe);
     close(pipe);
 
     return 0;
@@ -31,7 +31,7 @@ void writeOutput(int pipe) {
     char buffer[BUFFER_SIZE];
 
     while(1) {
-        if(read(pipe, buffer) == -1) {
+        if(read(pipe, buffer, BUFFER_SIZE) == -1) {
             return;
         }
         printf("%s", buffer);
