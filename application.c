@@ -41,6 +41,8 @@ int main(int argc, char *argv[]) {
 
     int slavesNum = calculateSlavesNum(argc);
     pipechannels pipes[slavesNum];
+    char* pipename="pipe";
+    mkfifo(pipename,0666);
 
     FILE * resultado = fopen("resultado", "w");
 
@@ -83,8 +85,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+
     cleanUp(mem, pipes, slavesNum, resultado);
     return 0;
+
+
 }
 
 char* buffToMem(char* ptr, char* buff, sem_t* sem) {
